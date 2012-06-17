@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>mandelbrot.frag</file>
+        <file>mandelbrot.vert</file>
+    </qresource>
+</RCC>

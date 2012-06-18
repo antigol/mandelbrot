@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>mandelbrot.frag</file>
         <file>mandelbrot.vert</file>
+        <file>mandelbrotd.frag</file>
     </qresource>
 </RCC>

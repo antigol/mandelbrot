@@ -19,5 +19,6 @@ RESOURCES += \
     mandelbrot.qrc
 
 OTHER_FILES += \
-    mandelbrot.frag \
-    mandelbrot.vert
+    mandelbrot.vert \
+    mandelbrotd.frag \
+    mandelbrot.frag

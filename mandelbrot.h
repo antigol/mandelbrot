@@ -41,6 +41,8 @@ private:
     QPointF _mouseposition;
 
     QTimer _timer;
+
+    PFNGLUNIFORM2DVPROC glUniform2dv;
 };
 
 #endif // MANDELBROT_H

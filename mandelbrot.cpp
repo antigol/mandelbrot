@@ -18,9 +18,13 @@ void Mandelbrot::initializeGL()
 {
     makeCurrent();
 
+    glUniform2dv = (PFNGLUNIFORM2DVPROC) context()->getProcAddress("glUniform2dv");
+    if (glUniform2dv)
+        qDebug() << "Yay! Hardware accelerated double precision enabled.";
+
     _shader = new QGLShaderProgram(this);
     _shader->addShaderFromSourceFile(QGLShader::Vertex, ":/mandelbrot.vert");
-    _shader->addShaderFromSourceFile(QGLShader::Fragment, ":/mandelbrot.frag");
+    _shader->addShaderFromSourceFile(QGLShader::Fragment, glUniform2dv ? ":/mandelbrotd.frag" : ":/mandelbrot.frag");
     _shader->bindAttributeLocation("vertex", 0);
     _shader->link();
     _shader->bind();
@@ -40,7 +44,7 @@ void Mandelbrot::resizeGL(int w, int h)
 {
     glViewport(0, 0, w, h);
     _shader->setUniformValue(_ratioLocation, GLfloat(w) / GLfloat(h ? h : 1));
-    _shader->setUniformValue(_accuracyLocation, 0);
+    _shader->setUniformValue(_accuracyLocation, 100);
     _timer.start(1000);
 }
 
@@ -55,7 +59,10 @@ void Mandelbrot::paintGL()
     };
     _shader->setAttributeArray(0, vertices, 2);
 
-    _shader->setUniformValue(_centerLocation, _center);
+    if (glUniform2dv)
+        glUniform2dv(_centerLocation, 1, reinterpret_cast<const GLdouble *>(&_center));
+    else
+        _shader->setUniformValue(_centerLocation, _center);
     _shader->setUniformValue(_scaleLocation, _scale);
 
     _shader->enableAttributeArray(0);
@@ -79,11 +86,11 @@ void Mandelbrot::mouseMoveEvent(QMouseEvent *e)
         QPointF d = e->posF() - _mouseposition;
         d.ry() = -d.y();
         d /= qreal(height());
-        d *= _scale * 2.0;
+        d *= 2.0*_scale;
 
         _center -= d;
 
-        _shader->setUniformValue(_accuracyLocation, 0);
+        _shader->setUniformValue(_accuracyLocation, 100);
         updateGL();
         _timer.start(500);
     }
@@ -95,17 +102,23 @@ void Mandelbrot::wheelEvent(QWheelEvent *e)
 {
     QGLWidget::wheelEvent(e);
 
-    GLfloat k = std::pow(0.9999f, e->delta());
-    _scale *= k;
+    QPointF p;
+    p.ry() = (1.0 - qreal(e->y()) / qreal(height())) * 2.0 - 1.0; // [-1;1]
+    p.rx() = (qreal(e->x()) / qreal(width()) * 2.0 - 1.0) * qreal(width()) / qreal(height()); // [-a,a]
+    p = _center + p * _scale;
 
-    _shader->setUniformValue(_accuracyLocation, 0);
+    GLfloat k = std::pow(0.999f, e->delta());
+    _scale *= k;
+    _center = k * _center + (1.0 - k) * p;
+
+    _shader->setUniformValue(_accuracyLocation, 100);
     updateGL();
     _timer.start(300);
 }
 
 void Mandelbrot::timerTimeout()
 {
-    _shader->setUniformValue(_accuracyLocation, 4);
+    _shader->setUniformValue(_accuracyLocation, 1000);
     updateGL();
 }
 

@@ -50,9 +50,10 @@ private:
     QTimer _timer;
 
     PFNGLUNIFORM2DVPROC glUniform2dv;
+    PFNGLUNIFORM1DVPROC glUniform1dv;
 
     int _lowaccuracy;
-    bool _updateaccuracy;
+    bool _render;
     QTime _time;
 };
 

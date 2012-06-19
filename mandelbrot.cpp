@@ -1,5 +1,6 @@
 #include "mandelbrot.h"
 #include <cmath>
+#include <iostream>
 
 Mandelbrot::Mandelbrot(QWidget *parent)
     : QGLWidget(parent)
@@ -12,10 +13,10 @@ Mandelbrot::Mandelbrot(QWidget *parent)
     _centerx = dd_real("-0.743643887037158704752191506114774");
     _centery = dd_real("0.131825904205311970493132056385139");
 
-    char str[200];
-    _centerx.write(str, 200, 50);
-    qDebug() << "-0.743643887037158704752191506114774";
-    qDebug() << str;
+//    char str[200];
+//    _centerx.write(str, 200, 50);
+//    qDebug() << "-0.743643887037158704752191506114774";
+//    qDebug() << str;
 
     _lowaccuracy = 50;
 }
@@ -29,8 +30,11 @@ void Mandelbrot::initializeGL()
     makeCurrent();
 
     glUniform2dv = (PFNGLUNIFORM2DVPROC) context()->getProcAddress("glUniform2dv");
-    if (glUniform2dv)
-        qDebug() << "Yay! Hardware accelerated double precision enabled.";
+    if (glUniform2dv) {
+        std::cout << "Yay! Hardware accelerated double precision enabled." << std::endl;
+    } else {
+        std::cout << "Arf! Hardware accelerated simple precision only enabled." << std::endl;
+    }
 
     _shader = new QGLShaderProgram(this);
     _shader->addShaderFromSourceFile(QGLShader::Vertex, ":/mandelbrot.vert");

@@ -24,7 +24,7 @@ void Mandelbrot::initializeGL()
 
     _shader = new QGLShaderProgram(this);
     _shader->addShaderFromSourceFile(QGLShader::Vertex, ":/mandelbrot.vert");
-    _shader->addShaderFromSourceFile(QGLShader::Fragment, glUniform2dv ? ":/mandelbrotd.frag" : ":/mandelbrot.frag");
+    _shader->addShaderFromSourceFile(QGLShader::Fragment, glUniform2dv ? ":/mandelbrotdn.frag" : ":/mandelbrot.frag");
     _shader->bindAttributeLocation("vertex", 0);
     _shader->link();
     _shader->bind();
@@ -74,6 +74,12 @@ void Mandelbrot::paintGL()
 void Mandelbrot::mousePressEvent(QMouseEvent *e)
 {
     QGLWidget::mousePressEvent(e);
+
+    QPointF p;
+    p.ry() = (1.0 - qreal(e->y()) / qreal(height())) * 2.0 - 1.0; // [-1;1]
+    p.rx() = (qreal(e->x()) / qreal(width()) * 2.0 - 1.0) * qreal(width()) / qreal(height()); // [-a,a]
+    p = _center + p * _scale;
+    qDebug() << p;
 
     _mouseposition = e->posF();
 }

@@ -21,4 +21,6 @@ RESOURCES += \
 OTHER_FILES += \
     mandelbrot.vert \
     mandelbrotd.frag \
-    mandelbrot.frag
+    mandelbrot.frag \
+    mandelbrotn.frag \
+    mandelbrotdd.frag

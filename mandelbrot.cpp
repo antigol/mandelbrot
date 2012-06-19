@@ -11,6 +11,11 @@ Mandelbrot::Mandelbrot(QWidget *parent)
 
     _centerx = qd_real("-0.743643887037158704752191506114774");
     _centery = qd_real("0.131825904205311970493132056385139");
+
+//    char str[200];
+//    _centerx.write(str, 200, 50);
+//    qDebug() << "-0.743643887037158704752191506114774";
+//    qDebug() << str;
     _lowaccuracy = 10;
 }
 

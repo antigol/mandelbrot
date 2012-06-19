@@ -24,3 +24,5 @@ OTHER_FILES += \
     mandelbrot.frag \
     mandelbrotn.frag \
     mandelbrotdd.frag
+
+LIBS += -lqd

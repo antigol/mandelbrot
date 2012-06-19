@@ -3,5 +3,6 @@
         <file>mandelbrot.frag</file>
         <file>mandelbrot.vert</file>
         <file>mandelbrotd.frag</file>
+        <file>mandelbrotdd.frag</file>
     </qresource>
 </RCC>

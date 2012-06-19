@@ -8,6 +8,10 @@ Mandelbrot::Mandelbrot(QWidget *parent)
 
     _timer.setSingleShot(true);
     connect(&_timer, SIGNAL(timeout()), this, SLOT(timerTimeout()));
+
+    _centerx = qd_real("-0.743643887037158704752191506114774");
+    _centery = qd_real("0.131825904205311970493132056385139");
+    _lowaccuracy = 10;
 }
 
 Mandelbrot::~Mandelbrot()
@@ -24,7 +28,7 @@ void Mandelbrot::initializeGL()
 
     _shader = new QGLShaderProgram(this);
     _shader->addShaderFromSourceFile(QGLShader::Vertex, ":/mandelbrot.vert");
-    _shader->addShaderFromSourceFile(QGLShader::Fragment, glUniform2dv ? ":/mandelbrotdn.frag" : ":/mandelbrot.frag");
+    _shader->addShaderFromSourceFile(QGLShader::Fragment, glUniform2dv ? ":/mandelbrotdd.frag" : ":/mandelbrot.frag");
     _shader->bindAttributeLocation("vertex", 0);
     _shader->link();
     _shader->bind();
@@ -44,7 +48,7 @@ void Mandelbrot::resizeGL(int w, int h)
 {
     glViewport(0, 0, w, h);
     _shader->setUniformValue(_ratioLocation, GLfloat(w) / GLfloat(h ? h : 1));
-    _shader->setUniformValue(_accuracyLocation, 100);
+    _shader->setUniformValue(_accuracyLocation, _lowaccuracy);
     _timer.start(1000);
 }
 
@@ -59,10 +63,18 @@ void Mandelbrot::paintGL()
     };
     _shader->setAttributeArray(0, vertices, 2);
 
-    if (glUniform2dv)
-        glUniform2dv(_centerLocation, 1, reinterpret_cast<const GLdouble *>(&_center));
-    else
+    if (glUniform2dv) {
+//        glUniform2dv(_centerLocation, 1, reinterpret_cast<const GLdouble *>(&_center));
+        GLdouble data[8] = {
+            _centerx[0], _centery[0],
+            _centerx[1], _centery[1],
+            _centerx[2], _centery[2],
+            _centerx[3], _centery[3]
+        };
+        glUniform2dv(_centerLocation, 4, data);
+    } else {
         _shader->setUniformValue(_centerLocation, _center);
+    }
     _shader->setUniformValue(_scaleLocation, _scale);
 
     _shader->enableAttributeArray(0);
@@ -96,7 +108,7 @@ void Mandelbrot::mouseMoveEvent(QMouseEvent *e)
 
         _center -= d;
 
-        _shader->setUniformValue(_accuracyLocation, 100);
+        _shader->setUniformValue(_accuracyLocation, _lowaccuracy);
         updateGL();
         _timer.start(500);
     }
@@ -117,14 +129,25 @@ void Mandelbrot::wheelEvent(QWheelEvent *e)
     _scale *= k;
     _center = k * _center + (1.0 - k) * p;
 
-    _shader->setUniformValue(_accuracyLocation, 100);
+    _shader->setUniformValue(_accuracyLocation, _lowaccuracy);
     updateGL();
     _timer.start(300);
 }
 
+void Mandelbrot::keyPressEvent(QKeyEvent *e)
+{
+    switch (e->key()) {
+    case Qt::Key_Space:
+        _shader->setUniformValue(_accuracyLocation, 1000 * _lowaccuracy);
+        updateGL();
+        break;
+    }
+}
+
 void Mandelbrot::timerTimeout()
 {
-    _shader->setUniformValue(_accuracyLocation, 1000);
+    _shader->setUniformValue(_accuracyLocation, 10 * _lowaccuracy);
+
     updateGL();
 }
 

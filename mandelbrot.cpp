@@ -9,14 +9,15 @@ Mandelbrot::Mandelbrot(QWidget *parent)
     _timer.setSingleShot(true);
     connect(&_timer, SIGNAL(timeout()), this, SLOT(timerTimeout()));
 
-    _centerx = qd_real("-0.743643887037158704752191506114774");
-    _centery = qd_real("0.131825904205311970493132056385139");
+    _centerx = dd_real("-0.743643887037158704752191506114774");
+    _centery = dd_real("0.131825904205311970493132056385139");
 
-//    char str[200];
-//    _centerx.write(str, 200, 50);
-//    qDebug() << "-0.743643887037158704752191506114774";
-//    qDebug() << str;
-    _lowaccuracy = 10;
+    char str[200];
+    _centerx.write(str, 200, 50);
+    qDebug() << "-0.743643887037158704752191506114774";
+    qDebug() << str;
+
+    _lowaccuracy = 50;
 }
 
 Mandelbrot::~Mandelbrot()
@@ -33,7 +34,7 @@ void Mandelbrot::initializeGL()
 
     _shader = new QGLShaderProgram(this);
     _shader->addShaderFromSourceFile(QGLShader::Vertex, ":/mandelbrot.vert");
-    _shader->addShaderFromSourceFile(QGLShader::Fragment, glUniform2dv ? ":/mandelbrotdd.frag" : ":/mandelbrot.frag");
+    _shader->addShaderFromSourceFile(QGLShader::Fragment, glUniform2dv ? ":/mandelbrotdd.frag" : ":/mandelbrotdf.frag");
     _shader->bindAttributeLocation("vertex", 0);
     _shader->link();
     _shader->bind();
@@ -71,14 +72,19 @@ void Mandelbrot::paintGL()
     if (glUniform2dv) {
 //        glUniform2dv(_centerLocation, 1, reinterpret_cast<const GLdouble *>(&_center));
         GLdouble data[8] = {
-            _centerx[0], _centery[0],
-            _centerx[1], _centery[1],
-            _centerx[2], _centery[2],
-            _centerx[3], _centery[3]
+            _centerx.x[0], _centerx.x[1],
+            _centery.x[0], _centery.x[1]
         };
         glUniform2dv(_centerLocation, 4, data);
     } else {
-        _shader->setUniformValue(_centerLocation, _center);
+//        _shader->setUniformValue(_centerLocation, _center);
+        double split[4];
+        qd::split(_center.x(), split[0], split[1]);
+        qd::split(_center.y(), split[2], split[3]);
+        GLfloat data[4] = {
+            split[0], split[1], split[2], split[3]
+        };
+        _shader->setUniformValueArray(_centerLocation, data, 4, 1);
     }
     _shader->setUniformValue(_scaleLocation, _scale);
 

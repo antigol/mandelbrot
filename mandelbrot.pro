@@ -19,10 +19,11 @@ RESOURCES += \
     mandelbrot.qrc
 
 OTHER_FILES += \
-    mandelbrot.vert \
     mandelbrotd.frag \
-    mandelbrot.frag \
-    mandelbrotn.frag \
+    mandelbrotqd.frag \
+    mandelbrotdf.frag \
+    mandelbrot.vert \
+    mandelbrotf.frag \
     mandelbrotdd.frag
 
 LIBS += -lqd

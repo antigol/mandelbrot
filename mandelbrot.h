@@ -2,6 +2,7 @@
 #define MANDELBROT_H
 
 #include <qd/qd_real.h>
+#include <qd/dd_real.h>
 #include <QtOpenGL/QGLWidget>
 #include <QtOpenGL/QGLShaderProgram>
 #include <QtGui/QVector4D>
@@ -38,8 +39,8 @@ private:
     int _ratioLocation;
     int _accuracyLocation;
 
-    qd_real _centerx;
-    qd_real _centery;
+    dd_real _centerx;
+    dd_real _centery;
 
     QPointF _center;
     GLfloat _scale;

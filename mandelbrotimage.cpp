@@ -19,7 +19,7 @@ void MandelbrotImage::generate(int width, int height, qd_real cx, qd_real cy, fl
     buffer.makeCurrent();
 
     PFNGLUNIFORM1DVPROC glUniform1dv = (PFNGLUNIFORM1DVPROC) QGLContext::currentContext()->getProcAddress("glUniform1dv");
-    glUniform1dv = 0;
+
     //    if (glUniform1dv) {
     //        std::cout << "Yay! Hardware accelerated double precision enabled." << std::endl;
     //    } else {

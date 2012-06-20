@@ -19,12 +19,8 @@ void main(void)
     vec2 cx = vec2(center[0], center[1]);
     vec2 cy = vec2(center[2], center[3]);
 
-    cx = add_df_df(cx, vec2(a.x, 0.0));
-    cy = add_df_df(cy, vec2(a.y, 0.0));
-    if (cx.y == 0.0) {
-        color = vec4(0.0, 0.0, 1.0, 1.0);
-        return;
-    }
+    cx = add_df_f(cx, a.x);
+    cy = add_df_f(cy, a.y);
 
     vec2 x = cx;
     vec2 y = cy;
@@ -118,18 +114,6 @@ vec2 add_df_df(in vec2 a, in vec2 b)
     e += (a.y + b.y);
     s = quick_two_sum(s, e, e);
     return vec2(s, e);
-    /*
-    vec2 dsc;
-    float t1, t2, e;
-
-    t1 = a.x + b.x;
-    e = t1 - a.x;
-    t2 = ((b.x - e) + (a.x - (t1 - e))) + a.y + b.y;
-
-    dsc.x = t1 + t2;
-    dsc.y = t2 - (dsc.x - t1);
-    return dsc;
-    */
 }
 
 vec2 mul_df_df(in vec2 a, in vec2 b)

@@ -25,22 +25,19 @@ void main(void)
     cx = add_df_f(cx, a.x);
     //    cy = add_df_f(cy, a.y);
     {
-        vec2 dsa = cy;
-        vec2 dsb = vec2(a.y, 0.0);
-        vec2 dsc;
         float t1, t2, e;
 
-        t1 = dsa.x + dsb.x;
-        e = t1 - dsa.x;
-        t2 = ((dsb.x - e) + (dsa.x - (t1 - e))) + dsa.y + dsb.y;
+        t1 = cy.x + a.y;
+        e = t1 - cy.x;
+        t2 = ((a.y - e) + (cy.x - (t1 - e))) + cy.y;
 
-        dsc.x = t1 + t2;
-        dsc.y = t2 - (dsc.x - t1);
-        cy = dsc;
-    }
-    if (cy.y == 0.0) {
-        color = vec4(0.0, 0.0, 1.0, 1.0);
-        return;
+        cy.x = t1 + t2;
+        cy.y = t2 - (cy.x - t1);
+
+        if (cy.y == 0.0) {
+            color = vec4(0.0, 0.0, 1.0, 1.0);
+            return;
+        }
     }
 
     vec2 x = cx;

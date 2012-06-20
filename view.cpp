@@ -6,6 +6,7 @@
 #include <QInputDialog>
 #include <QFileDialog>
 #include <QDir>
+#include <iostream>
 
 View::View(QWidget *parent) :
     QWidget(parent)
@@ -15,7 +16,7 @@ View::View(QWidget *parent) :
     _cx = dd_real("-0.743643887037158704752191506114774");
     _cy = dd_real("0.131825904205311970493132056385139");
     _scale = 1.0;
-    _accuracy = 300;
+    _accuracy = _set.value("accuracy", 100).toInt();
 
     _timer.setSingleShot(true);
     connect(&_timer, SIGNAL(timeout()), this, SLOT(updateMandelbrotAndDraw()));
@@ -25,11 +26,12 @@ View::View(QWidget *parent) :
 
 View::~View()
 {
+    _set.setValue("accuracy", _accuracy);
 }
 
 void View::resizeEvent(QResizeEvent *)
 {
-    updateMandelbrot();
+    _timer.start(200);
 }
 
 void View::paintEvent(QPaintEvent *)
@@ -102,24 +104,45 @@ void View::keyPressEvent(QKeyEvent *e)
 {
     switch (e->key()) {
     case Qt::Key_Return:
-        int accuracy = QInputDialog::getInt(this, "Accuracy", "2000 is a good value", 2000, 1);
-        QString file = QFileDialog::getSaveFileName(this, "Capture", _set.value("file", QDir::homePath()).toString());
-        if (!file.isEmpty()) {
-            _set.setValue("file", file);
-            _mandelbrot.generate(QApplication::desktop()->screenGeometry().size(),
-                                 _cx, _cy, _scale, accuracy);
-            _mandelbrot.image().save(file, 0, 100);
-        }
+        save();
         break;
+    case Qt::Key_Plus:
+        _accuracy *= 1.2;
+        _timer.start(1000);
+        std::cout << "Accuracy : " << _accuracy << std::endl;
+        break;
+    case Qt::Key_Minus:
+        _accuracy /= 1.2;
+        if (_accuracy < 5) _accuracy = 5;
+        _timer.start(1000);
+        std::cout << "Accuracy : " << _accuracy << std::endl;
+        break;
+    }
+}
+
+void View::save()
+{
+    int accuracy = QInputDialog::getInt(this, "Accuracy", "2000 is a good value", 2000, 1);
+    QString file = QFileDialog::getSaveFileName(this, "Capture", _set.value("file", QDir::homePath()).toString());
+    if (!file.isEmpty()) {
+        _set.setValue("file", file);
+        _mandelbrot.generate(QApplication::desktop()->screenGeometry().size(),
+                             _cx, _cy, _scale, accuracy);
+        _mandelbrot.image().save(file, 0, 100);
     }
 }
 
 void View::updateMandelbrot()
 {
+    std::cout << "Generate new image. Accuracy(" << _accuracy << ")... ";
+    std::cout.flush();
+
     _mandelbrot.generate(size(), _cx, _cy, _scale, _accuracy);
     _imove.setX(0.0);
     _imove.setY(0.0);
     _iscale = 1.0;
+
+    std::cout << "Ok!" << std::endl;
 }
 
 void View::updateMandelbrotAndDraw()

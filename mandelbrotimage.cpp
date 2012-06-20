@@ -4,10 +4,6 @@
 MandelbrotImage::MandelbrotImage(QObject *parent) :
     QObject(parent)
 {
-//    QGLFormat format;
-//    _pixmap = new QPixmap(100, 100);
-//    _context = new QGLContext(format, _pixmap);
-//    qDebug() << _context->create();
 }
 
 const QImage &MandelbrotImage::image() const
@@ -22,11 +18,11 @@ void MandelbrotImage::generate(int width, int height, dd_real cx, dd_real cy, fl
 
     PFNGLUNIFORM1DVPROC glUniform1dv = (PFNGLUNIFORM1DVPROC) QGLContext::currentContext()->getProcAddress("glUniform1dv");
 
-    if (glUniform1dv) {
-        std::cout << "Yay! Hardware accelerated double precision enabled." << std::endl;
-    } else {
-        std::cout << "Arf! Hardware accelerated simple precision only enabled." << std::endl;
-    }
+//    if (glUniform1dv) {
+//        std::cout << "Yay! Hardware accelerated double precision enabled." << std::endl;
+//    } else {
+//        std::cout << "Arf! Hardware accelerated simple precision only enabled." << std::endl;
+//    }
 
     QGLShaderProgram shader;
     shader.addShaderFromSourceFile(QGLShader::Vertex, ":/mandelbrot.vert");

@@ -24,6 +24,7 @@ protected:
     void keyPressEvent(QKeyEvent *e);
 
 private slots:
+    void save();
     void updateMandelbrot();
     void updateMandelbrotAndDraw();
 

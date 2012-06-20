@@ -18,10 +18,6 @@ public:
     void generate(QSize size, dd_real cx, dd_real cy, float scale, int accuracy);
 
 private:
-//    QGLContext *_context;
-
-//    QPixmap *_pixmap;
-
     QImage _image;
 
     QVector3D fire(double f);

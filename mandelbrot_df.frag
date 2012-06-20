@@ -14,13 +14,34 @@ vec2 add_df_df(in vec2 a, in vec2 b);
 vec2 mul_df_df(in vec2 a, in vec2 b);
 bool greater_than_df_f(in vec2 a, in float b);
 
+float two_sum(in float a, in float b, out float err);
+float quick_two_sum(in float a, in float b, out float err);
+
 void main(void)
 {
     vec2 cx = vec2(center[0], center[1]);
     vec2 cy = vec2(center[2], center[3]);
 
     cx = add_df_f(cx, a.x);
-    cy = add_df_f(cy, a.y);
+    //    cy = add_df_f(cy, a.y);
+    {
+        vec2 dsa = cy;
+        vec2 dsb = vec2(a.y, 0.0);
+        vec2 dsc;
+        float t1, t2, e;
+
+        t1 = dsa.x + dsb.x;
+        e = t1 - dsa.x;
+        t2 = ((dsb.x - e) + (dsa.x - (t1 - e))) + dsa.y + dsb.y;
+
+        dsc.x = t1 + t2;
+        dsc.y = t2 - (dsc.x - t1);
+        cy = dsc;
+    }
+    if (cy.y == 0.0) {
+        color = vec4(0.0, 0.0, 1.0, 1.0);
+        return;
+    }
 
     vec2 x = cx;
     vec2 y = cy;

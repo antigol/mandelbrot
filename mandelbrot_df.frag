@@ -17,19 +17,14 @@ bool greater_than_df_f(in vec2 a, in float b);
 void main(void)
 {
     {
-        float a = 1.0/130.0;
-        vec2 b = vec2(1.0/3.0, 1.0/70.0);
+        float u = a.x;
+        float v = a.y;
 
-        float t1, t2, e;
+        float s = u + v;
+        float e = s - u;
+        e = v - e;
 
-        t1 = b.x + a;
-        e = t1 - b.x;
-        t2 = ((a - e) + (b.x - (t1 - e))) + b.y;
-
-        b.x = t1 + t2;
-        b.y = t2 - (b.x - t1);
-
-        if (b.y == 0.0) {
+        if (e == 0.0) {
             color = vec4(0.0, 0.0, 1.0, 1.0);
             return;
         }

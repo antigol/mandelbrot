@@ -1,16 +1,17 @@
-#version 130
+#version 420
 
-in vec2 a;
+in vec2 vertex;
 
-uniform float center[4];
-uniform vec3 colormap[256];
-uniform int accuracy;
-
-out vec4 color;
+uniform float scale; // height
+uniform float aspect;
 
 struct df_real {
     float x[2];
 };
+
+out df_real ax;
+out df_real ay;
+
 df_real df_real_mk(in float c0, in float c1);
 df_real add_df_f(in df_real a, in float b);
 df_real mul_df_f(in df_real a, in float b);
@@ -21,40 +22,13 @@ bool greater_than_df_f(in df_real a, in float b);
 
 void main(void)
 {
-    df_real cx = df_real_mk(center[0], center[1]);
-    df_real cy = df_real_mk(center[2], center[3]);
+    df_real x = df_real_mk(vertex.x, 0.0);
+    ax = mul_df_f(x, scale * aspect);
 
-    cx = add_df_f(cx, a.x);
-    cy = add_df_f(cy, a.y);
+    df_real y = df_real_mk(vertex.y, 0.0);
+    ay = mul_df_f(y, scale);
 
-    df_real x = cx;
-    df_real y = cy;
-
-    int iteration = 0;
-
-    do {
-        df_real x2 = mul_df_df(x, x);
-        df_real y2 = mul_df_df(y, y);
-        df_real lt = add_df_df(x2, y2);
-        if (greater_than_df_f(lt, 4.0))
-            break;
-
-        df_real xtemp = add_df_df(x2, minus_df(y2));
-        xtemp = add_df_df(xtemp, cx);
-
-        y = mul_df_df(x, y);
-        y = mul_df_f(y, 2.0);
-        y = add_df_df(y, cy);
-
-        x = xtemp;
-        ++iteration;
-    } while (iteration < accuracy);
-
-    if (iteration < accuracy) {
-        color = vec4(colormap[iteration & 255], 1.0);
-    } else {
-        color = vec4(0.0, 0.0, 0.0, 1.0);
-    }
+    gl_Position = vec4(vertex, 0.0, 1.0);
 }
 
 float two_sum(in float a, in float b, out float err)

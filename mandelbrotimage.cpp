@@ -1,6 +1,8 @@
 #include "mandelbrotimage.h"
 #include <QGLShaderProgram>
 
+#define QUAD false
+
 MandelbrotImage::MandelbrotImage(QObject *parent) :
     QObject(parent)
 {
@@ -11,22 +13,26 @@ const QImage &MandelbrotImage::image() const
     return _image;
 }
 
-void MandelbrotImage::generate(int width, int height, dd_real cx, dd_real cy, float scale, int accuracy)
+void MandelbrotImage::generate(int width, int height, qd_real cx, qd_real cy, float scale, int accuracy)
 {
     QGLPixelBuffer buffer(width, height);
     buffer.makeCurrent();
 
     PFNGLUNIFORM1DVPROC glUniform1dv = (PFNGLUNIFORM1DVPROC) QGLContext::currentContext()->getProcAddress("glUniform1dv");
-
-//    if (glUniform1dv) {
-//        std::cout << "Yay! Hardware accelerated double precision enabled." << std::endl;
-//    } else {
-//        std::cout << "Arf! Hardware accelerated simple precision only enabled." << std::endl;
-//    }
+    glUniform1dv = 0;
+    //    if (glUniform1dv) {
+    //        std::cout << "Yay! Hardware accelerated double precision enabled." << std::endl;
+    //    } else {
+    //        std::cout << "Arf! Hardware accelerated simple precision only enabled." << std::endl;
+    //    }
+//    dd_real test = dd_real(cx[0], cx[1]);
+//    dd_real ta = test + scale;
+//    dd_real tb = test + scale / 2.0;
+//    std::cout << ta - tb << " * 2.0 = " << scale << std::endl;
 
     QGLShaderProgram shader;
-    shader.addShaderFromSourceFile(QGLShader::Vertex, ":/mandelbrot.vert");
-    shader.addShaderFromSourceFile(QGLShader::Fragment, glUniform1dv ? ":/mandelbrotdd.frag" : ":/mandelbrotdf.frag");
+    shader.addShaderFromSourceFile(QGLShader::Vertex, ":/mandelbrot_f.vert");
+    shader.addShaderFromSourceFile(QGLShader::Fragment, glUniform1dv ? (QUAD ? ":/mandelbrot_qd.frag" : ":/mandelbrot_d.frag") : ":/mandelbrot_df.frag");
     shader.bindAttributeLocation("vertex", 0);
     if (!shader.link())
         qDebug() << "link error" << shader.log();
@@ -47,11 +53,19 @@ void MandelbrotImage::generate(int width, int height, dd_real cx, dd_real cy, fl
     shader.setAttributeArray(0, vertices, 2);
 
     if (glUniform1dv) {
-        GLdouble data[8] = {
-            cx.x[0], cx.x[1],
-            cy.x[0], cy.x[1]
-        };
-        glUniform1dv(shader.uniformLocation("center"), 4, data);
+        if (QUAD) {
+            GLdouble data[8] = {
+                cx[0], cx[1], cx[2], cx[3],
+                cy[0], cy[1], cy[2], cy[3]
+            };
+            glUniform1dv(shader.uniformLocation("center"), 8, data);
+        } else {
+            GLdouble data[4] = {
+                cx[0], cx[1],
+                cy[0], cy[1]
+            };
+            glUniform1dv(shader.uniformLocation("center"), 4, data);
+        }
     } else {
         double split[4];
         qd::split(cx.x[0], split[0], split[1]);
@@ -73,7 +87,7 @@ void MandelbrotImage::generate(int width, int height, dd_real cx, dd_real cy, fl
     buffer.doneCurrent();
 }
 
-void MandelbrotImage::generate(QSize size, dd_real cx, dd_real cy, float scale, int accuracy)
+void MandelbrotImage::generate(QSize size, qd_real cx, qd_real cy, float scale, int accuracy)
 {
     generate(size.width(), size.height(), cx, cy, scale, accuracy);
 }

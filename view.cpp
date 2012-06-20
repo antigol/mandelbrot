@@ -13,10 +13,10 @@ View::View(QWidget *parent) :
 {
     setAttribute(Qt::WA_OpaquePaintEvent);
 
-    _cx = dd_real("-0.743643887037158704752191506114774");
-    _cy = dd_real("0.131825904205311970493132056385139");
+    _cx = qd_real("-0.743643887037158704752191506114774");
+    _cy = qd_real("0.131825904205311970493132056385139");
     _scale = 1.0;
-    _accuracy = _set.value("accuracy", 100).toInt();
+    _accuracy = 100;//_set.value("accuracy", 100).toInt();
 
     _timer.setSingleShot(true);
     connect(&_timer, SIGNAL(timeout()), this, SLOT(updateMandelbrotAndDraw()));
@@ -83,8 +83,8 @@ void View::wheelEvent(QWheelEvent *e)
 
     qreal mousey = (1.0 - qreal(e->y()) / qreal(height())) * 2.0 - 1.0; // [-1;1]
     qreal mousex = (qreal(e->x()) / qreal(width()) * 2.0 - 1.0) * qreal(width()) / qreal(height()); // [-a,a]
-    dd_real x = _cx + mousex * _scale;
-    dd_real y = _cy + mousey * _scale;
+    qd_real x = _cx + mousex * _scale;
+    qd_real y = _cy + mousey * _scale;
 
     GLfloat k = std::pow(0.999f, e->delta());
     _scale *= k;
@@ -117,24 +117,37 @@ void View::keyPressEvent(QKeyEvent *e)
         _timer.start(1000);
         std::cout << "Accuracy : " << _accuracy << std::endl;
         break;
+    case Qt::Key_PageUp:
+        _scale /= 1.2;
+        _iscale *= 1.2;
+        std::cout << "Scale : " << _scale << std::endl;
+        update();
+        _timer.start(1000);
+        break;
+    case Qt::Key_PageDown:
+        _scale *= 1.2;
+        _iscale /= 1.2;
+        std::cout << "Scale : " << _scale << std::endl;
+        update();
+        _timer.start(1000);
+        break;
     }
 }
 
 void View::save()
 {
-    int accuracy = QInputDialog::getInt(this, "Accuracy", "2000 is a good value", 2000, 1);
     QString file = QFileDialog::getSaveFileName(this, "Capture", _set.value("file", QDir::homePath()).toString());
     if (!file.isEmpty()) {
         _set.setValue("file", file);
         _mandelbrot.generate(QApplication::desktop()->screenGeometry().size(),
-                             _cx, _cy, _scale, accuracy);
+                             _cx, _cy, _scale, _accuracy);
         _mandelbrot.image().save(file, 0, 100);
     }
 }
 
 void View::updateMandelbrot()
 {
-    std::cout << "Generate new image. Accuracy(" << _accuracy << ")... ";
+    std::cout << "Generate new image. Cx(" << _cx << ") Cy(" << _cy << ") Scale(" << _scale << ") Accuracy(" << _accuracy << ")... ";
     std::cout.flush();
 
     _mandelbrot.generate(size(), _cx, _cy, _scale, _accuracy);

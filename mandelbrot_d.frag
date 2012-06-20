@@ -2,18 +2,20 @@
 
 in vec2 a;
 
-uniform dvec2 center;
-uniform vec4 colormap[256];
+uniform double center[4];
+uniform vec3 colormap[256];
 uniform int accuracy;
 
 out vec4 color;
 
 void main(void)
 {
-    const float Limit = 4.0;
+    double cx = center[0] + double(a.x);
+    double cy = center[2] + double(a.y);
 
-    double x = 0.0;
-    double y = 0.0;
+    double x = cx;
+    double y = cy;
+
     int iteration = 0;
 
     do {
@@ -21,14 +23,16 @@ void main(void)
         double y2 = y * y;
         if ((x2 + y2) > 4.0)
             break;
-        double xtemp = x2 - y2 + a.x + center.x;
-        y = 2 * x * y + a.y + center.y;
+
+        double xtemp = x2 - y2 + cx;
+        y = 2 * x * y + cy;
+
         x = xtemp;
         ++iteration;
     } while (iteration < accuracy);
 
     if (iteration < accuracy) {
-        color = colormap[iteration & 255];
+        color = vec4(colormap[iteration & 255], 1.0);
     } else {
         color = vec4(0.0, 0.0, 0.0, 1.0);
     }

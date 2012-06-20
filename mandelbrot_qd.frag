@@ -2,14 +2,14 @@
 
 in vec2 a;
 
-uniform dvec2 center[4];
-uniform vec4 colormap[256];
+uniform double center[8];
+uniform vec3 colormap[256];
 uniform int accuracy;
 
 out vec4 color;
 
 struct qd_real {
-  double x[4];
+    double x[4];
 };
 qd_real qd_real_mk(in double c0, in double c1, in double c2, in double c3);
 qd_real add_qd_d(in qd_real a, in double b);
@@ -17,24 +17,18 @@ qd_real mul_qd_d(in qd_real a, in double b);
 qd_real add_qd_qd(in qd_real a, in qd_real b);
 qd_real mul_qd_qd(in qd_real a, in qd_real b);
 qd_real minus_qd(in qd_real a);
+bool greater_than_qd_d(in qd_real a, in double b);
 
 void main(void)
 {
-    const float Limit = 4.0;
+    qd_real cx = qd_real_mk(center[0], center[1], center[2], center[3]);
+    qd_real cy = qd_real_mk(center[4], center[5], center[6], center[7]);
 
-    qd_real cx = qd_real_mk(center[0].x, center[1].x, center[2].x, center[3].x);
-    qd_real cy = qd_real_mk(center[0].y, center[1].y, center[2].y, center[3].y);
-//    qd_real cx = qd_real_mk(center.x, 0.0, 0.0, 0.0);
-//    qd_real cy = qd_real_mk(center.y, 0.0, 0.0, 0.0);
+    cx = add_qd_d(cx, double(a.x));
+    cy = add_qd_d(cy, double(a.y));
 
-    cx = add_qd_d(cx, a.x);
-    cy = add_qd_d(cy, a.y);
-
-    qd_real x;
-    x.x[0] = x.x[1] = x.x[2] = x.x[3] = 0.0;
-
-    qd_real y;
-    y.x[0] = y.x[1] = y.x[2] = y.x[3] = 0.0;
+    qd_real x = cx;
+    qd_real y = cy;
 
     int iteration = 0;
 
@@ -42,7 +36,7 @@ void main(void)
         qd_real x2 = mul_qd_qd(x, x);
         qd_real y2 = mul_qd_qd(y, y);
         qd_real lt = add_qd_qd(x2, y2);
-        if (lt.x[0] > 4.0 || (lt.x[0] == 4.0 && lt.x[1] > 0.0))
+        if (greater_than_qd_d(lt, 4.0))
             break;
 
         qd_real xtemp = add_qd_qd(x2, minus_qd(y2));
@@ -57,7 +51,7 @@ void main(void)
     } while (iteration < accuracy);
 
     if (iteration < accuracy) {
-        color = colormap[iteration & 255];
+        color = vec4(colormap[iteration & 255], 1.0);
     } else {
         color = vec4(0.0, 0.0, 0.0, 1.0);
     }
@@ -82,7 +76,7 @@ void renorm(inout double c0, inout double c1, inout double c2, inout double c3, 
 {
     double s0, s1, s2 = 0.0, s3 = 0.0;
 
-//    if (QD_ISINF(c0)) return;
+    //    if (QD_ISINF(c0)) return;
 
     s0 = quick_two_sum(c3, c4, c4);
     s0 = quick_two_sum(c2, s0, c3);
@@ -94,35 +88,35 @@ void renorm(inout double c0, inout double c1, inout double c2, inout double c3, 
 
     s0 = quick_two_sum(c0, c1, s1);
     if (s1 != 0.0) {
-      s1 = quick_two_sum(s1, c2, s2);
-      if (s2 != 0.0) {
-        s2 = quick_two_sum(s2, c3, s3);
-        if (s3 != 0.0)
-          s3 += c4;
-        else
-          s2 += c4;
-      } else {
-        s1 = quick_two_sum(s1, c3, s2);
-        if (s2 != 0.0)
-          s2 = quick_two_sum(s2, c4, s3);
-        else
-          s1 = quick_two_sum(s1, c4, s2);
-      }
+        s1 = quick_two_sum(s1, c2, s2);
+        if (s2 != 0.0) {
+            s2 = quick_two_sum(s2, c3, s3);
+            if (s3 != 0.0)
+                s3 += c4;
+            else
+                s2 += c4;
+        } else {
+            s1 = quick_two_sum(s1, c3, s2);
+            if (s2 != 0.0)
+                s2 = quick_two_sum(s2, c4, s3);
+            else
+                s1 = quick_two_sum(s1, c4, s2);
+        }
     } else {
-      s0 = quick_two_sum(s0, c2, s1);
-      if (s1 != 0.0) {
-        s1 = quick_two_sum(s1, c3, s2);
-        if (s2 != 0.0)
-          s2 = quick_two_sum(s2, c4, s3);
-        else
-          s1 = quick_two_sum(s1, c4, s2);
-      } else {
-        s0 = quick_two_sum(s0, c3, s1);
-        if (s1 != 0.0)
-          s1 = quick_two_sum(s1, c4, s2);
-        else
-          s0 = quick_two_sum(s0, c4, s1);
-      }
+        s0 = quick_two_sum(s0, c2, s1);
+        if (s1 != 0.0) {
+            s1 = quick_two_sum(s1, c3, s2);
+            if (s2 != 0.0)
+                s2 = quick_two_sum(s2, c4, s3);
+            else
+                s1 = quick_two_sum(s1, c4, s2);
+        } else {
+            s0 = quick_two_sum(s0, c3, s1);
+            if (s1 != 0.0)
+                s1 = quick_two_sum(s1, c4, s2);
+            else
+                s0 = quick_two_sum(s0, c4, s1);
+        }
     }
 
     c0 = s0;
@@ -159,21 +153,11 @@ qd_real add_qd_d(in qd_real a, in double b)
 void split(in double a, out double hi, out double lo)
 {
     const double _QD_SPLITTER = 134217729.0;               // = 2^27 + 1
-//    const double _QD_SPLIT_THRESH = 6.69692879491417e+299; // = 2^996
 
     double temp;
-//    if (a > 6.69692879491417e+299 || a < -6.69692879491417e+299) {
-//      a *= 3.7252902984619140625e-09;  // 2^-28
-//      temp = _QD_SPLITTER * a;
-//      hi = temp - (temp - a);
-//      lo = a - hi;
-//      hi *= 268435456.0;          // 2^28
-//      lo *= 268435456.0;          // 2^28
-//    } else {
-      temp = _QD_SPLITTER * a;
-      hi = temp - (temp - a);
-      lo = a - hi;
-//    }
+    temp = _QD_SPLITTER * a;
+    hi = temp - (temp - a);
+    lo = a - hi;
 }
 
 double two_prod(in double a, in double b, out double err)
@@ -343,4 +327,9 @@ qd_real mul_qd_qd(in qd_real a, in qd_real b)
 qd_real minus_qd(in qd_real a)
 {
     return qd_real_mk(-a.x[0], -a.x[1], -a.x[2], -a.x[3]);
+}
+
+bool greater_than_qd_d(in qd_real a, in double b)
+{
+    return a.x[0] > b || (a.x[0] == b && (a.x[1] > 0.0 || (a.x[1] == 0.0 && (a.x[2] > 0.0 || (a.x[2] == 0.0 && a.x[3] > 0.0)))));
 }

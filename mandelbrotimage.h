@@ -5,7 +5,7 @@
 #include <QImage>
 #include <QPixmap>
 #include <QtOpenGL/QGLPixelBuffer>
-#include <qd/dd_real.h>
+#include <qd/qd_real.h>
 
 class MandelbrotImage : public QObject
 {
@@ -14,8 +14,8 @@ public:
     explicit MandelbrotImage(QObject *parent = 0);
 
     const QImage &image() const;
-    void generate(int width, int height, dd_real cx, dd_real cy, float scale, int accuracy);
-    void generate(QSize size, dd_real cx, dd_real cy, float scale, int accuracy);
+    void generate(int width, int height, qd_real cx, qd_real cy, float scale, int accuracy);
+    void generate(QSize size, qd_real cx, qd_real cy, float scale, int accuracy);
 
 private:
     QImage _image;

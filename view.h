@@ -34,7 +34,7 @@ private:
     QPointF _imove;
     qreal _iscale;
 
-    dd_real _cx, _cy;
+    qd_real _cx, _cy;
     float _scale;
     int _accuracy;
 

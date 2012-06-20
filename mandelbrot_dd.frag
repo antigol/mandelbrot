@@ -17,15 +17,15 @@ dd_real mul_dd_d(in dd_real a, in double b);
 dd_real add_dd_dd(in dd_real a, in dd_real b);
 dd_real mul_dd_dd(in dd_real a, in dd_real b);
 dd_real minus_dd(in dd_real a);
-bool greater_than_dd_f(in dd_real a, in double b);
+bool greater_than_dd_d(in dd_real a, in double b);
 
 void main(void)
 {
     dd_real cx = dd_real_mk(center[0], center[1]);
     dd_real cy = dd_real_mk(center[2], center[3]);
 
-    cx = add_dd_d(cx, a.x);
-    cy = add_dd_d(cy, a.y);
+    cx = add_dd_dd(cx, dd_real_mk(double(a.x), 0.0));
+    cy = add_dd_dd(cy, dd_real_mk(double(a.y), 0.0));
 
     dd_real x = cx;
     dd_real y = cy;
@@ -36,7 +36,7 @@ void main(void)
         dd_real x2 = mul_dd_dd(x, x);
         dd_real y2 = mul_dd_dd(y, y);
         dd_real lt = add_dd_dd(x2, y2);
-        if (greater_than_dd_f(lt, 4.0))
+        if (greater_than_dd_d(lt, 4.0))
             break;
 
         dd_real xtemp = add_dd_dd(x2, minus_dd(y2));
@@ -144,7 +144,7 @@ dd_real minus_dd(in dd_real a)
     return dd_real_mk(-a.x[0], -a.x[1]);
 }
 
-bool greater_than_dd_f(in dd_real a, in double b)
+bool greater_than_dd_d(in dd_real a, in double b)
 {
     return (a.x[0] > b || (a.x[0] == b && a.x[1] > 0.0));
 }

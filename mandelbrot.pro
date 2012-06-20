@@ -11,9 +11,12 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mandelbrot.cpp
+    mandelbrotimage.cpp \
+    view.cpp
 
-HEADERS  += mandelbrot.h
+HEADERS  += \
+    mandelbrotimage.h \
+    view.h
 
 RESOURCES += \
     mandelbrot.qrc
@@ -27,3 +30,5 @@ OTHER_FILES += \
     mandelbrotdd.frag
 
 LIBS += -lqd
+
+FORMS +=

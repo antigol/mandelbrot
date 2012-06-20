@@ -3,13 +3,13 @@
 in vec2 a;
 
 uniform float center[4];
-uniform vec4 colormap[256];
+uniform vec3 colormap[256];
 uniform int accuracy;
 
 out vec4 color;
 
 struct df_real {
-    float x[4];
+    float x[2];
 };
 df_real df_real_mk(in float c0, in float c1);
 df_real add_df_f(in df_real a, in float b);
@@ -51,7 +51,7 @@ void main(void)
     } while (iteration < accuracy);
 
     if (iteration < accuracy) {
-        color = colormap[iteration & 255];
+        color = vec4(colormap[iteration & 255], 1.0);
     } else {
         color = vec4(0.0, 0.0, 0.0, 1.0);
     }

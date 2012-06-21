@@ -37,6 +37,7 @@ private:
     qd_real _cx, _cy;
     float _scale;
     int _accuracy;
+    float _radius;
 
     QPointF _lastMousePosition;
     QTimer _timer;

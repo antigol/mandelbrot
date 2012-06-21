@@ -14,8 +14,8 @@ public:
     explicit MandelbrotImage(QObject *parent = 0);
 
     const QImage &image() const;
-    void generate(int width, int height, qd_real cx, qd_real cy, float scale, int accuracy);
-    void generate(QSize size, qd_real cx, qd_real cy, float scale, int accuracy);
+    void generate(int width, int height, qd_real cx, qd_real cy, float scale, int accuracy, float radius);
+    void generate(QSize size, qd_real cx, qd_real cy, float scale, int accuracy, float radius);
 
 private:
     QImage _image;

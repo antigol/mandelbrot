@@ -5,6 +5,7 @@ in vec2 a;
 uniform float center[4];
 uniform vec3 colormap[256];
 uniform int accuracy;
+uniform float radius;
 
 out vec4 color;
 
@@ -16,21 +17,6 @@ bool greater_than_df_f(in vec2 a, in float b);
 
 void main(void)
 {
-    {
-        float u = a.x;
-        float v = center[0];
-
-        float s = u + v;
-        float bb = s - u;
-        float e = (u - (s - bb)) + (v - bb);
-        e = v - e;
-
-        if (e == 0.0) {
-            color = vec4(0.0, 0.0, 1.0, 1.0);
-            return;
-        }
-    }
-
     vec2 cx = vec2(center[0], center[1]);
     vec2 cy = vec2(center[2], center[3]);
 
@@ -46,7 +32,7 @@ void main(void)
         vec2 x2 = mul_df_df(x, x);
         vec2 y2 = mul_df_df(y, y);
         vec2 lt = add_df_df(x2, y2);
-        if (greater_than_df_f(lt, 4.0))
+        if (greater_than_df_f(lt, radius))
             break;
 
         vec2 xtemp = add_df_df(x2, -y2);

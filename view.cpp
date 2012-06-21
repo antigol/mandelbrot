@@ -17,6 +17,7 @@ View::View(QWidget *parent) :
     _cy = qd_real("0.131825904205311970493132056385139");
     _scale = 1.0;
     _accuracy = 100;//_set.value("accuracy", 100).toInt();
+    _radius = 4.0;
 
     _timer.setSingleShot(true);
     connect(&_timer, SIGNAL(timeout()), this, SLOT(updateMandelbrotAndDraw()));
@@ -107,15 +108,25 @@ void View::keyPressEvent(QKeyEvent *e)
         save();
         break;
     case Qt::Key_Plus:
-        _accuracy *= 1.2;
+        if (e->modifiers() & Qt::ShiftModifier) {
+            _radius *= 1.1;
+            std::cout << "Radius : " << _radius << std::endl;
+        } else {
+            _accuracy *= 1.2;
+            std::cout << "Accuracy : " << _accuracy << std::endl;
+        }
         _timer.start(1000);
-        std::cout << "Accuracy : " << _accuracy << std::endl;
         break;
     case Qt::Key_Minus:
-        _accuracy /= 1.2;
-        if (_accuracy < 5) _accuracy = 5;
+        if (e->modifiers() & Qt::ShiftModifier) {
+            _radius /= 1.1;
+            std::cout << "Radius : " << _radius << std::endl;
+        } else {
+            _accuracy /= 1.2;
+            if (_accuracy < 5) _accuracy = 5;
+            std::cout << "Accuracy : " << _accuracy << std::endl;
+        }
         _timer.start(1000);
-        std::cout << "Accuracy : " << _accuracy << std::endl;
         break;
     case Qt::Key_PageUp:
         _scale /= 1.2;
@@ -141,9 +152,9 @@ void View::save()
         _set.setValue("file", file);
 
         QSize ss = QApplication::desktop()->screenGeometry().size();
-        std::cout << "Generate new image(" << ss.width() << "," << ss.height() << ") Cx(" << _cx << ") Cy(" << _cy << ") Scale(" << _scale << ") Accuracy(" << _accuracy << ")... ";
+        std::cout << "Generate new image(" << ss.width() << "," << ss.height() << ") Cx(" << _cx << ") Cy(" << _cy << ") Scale(" << _scale << ") Accuracy(" << _accuracy << ") Radius(" << _radius << ")... ";
         std::cout.flush();
-        _mandelbrot.generate(ss, _cx, _cy, _scale, _accuracy);
+        _mandelbrot.generate(ss, _cx, _cy, _scale, _accuracy, _radius);
         _mandelbrot.image().save(file, 0, 100);
         std::cout << "Saved!" << std::endl;
     }
@@ -151,10 +162,10 @@ void View::save()
 
 void View::updateMandelbrot()
 {
-    std::cout << "Generate new image. Cx(" << _cx << ") Cy(" << _cy << ") Scale(" << _scale << ") Accuracy(" << _accuracy << ")... ";
+    std::cout << "Generate new image. Cx(" << _cx << ") Cy(" << _cy << ") Scale(" << _scale << ") Accuracy(" << _accuracy << ") Radius(" << _radius << ")... ";
     std::cout.flush();
 
-    _mandelbrot.generate(size(), _cx, _cy, _scale, _accuracy);
+    _mandelbrot.generate(size(), _cx, _cy, _scale, _accuracy, _radius);
     _imove.setX(0.0);
     _imove.setY(0.0);
     _iscale = 1.0;

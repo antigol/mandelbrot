@@ -13,7 +13,7 @@ const QImage &MandelbrotImage::image() const
     return _image;
 }
 
-void MandelbrotImage::generate(int width, int height, qd_real cx, qd_real cy, float scale, int accuracy)
+void MandelbrotImage::generate(int width, int height, qd_real cx, qd_real cy, float scale, int accuracy, float radius)
 {
     QGLPixelBuffer buffer(width, height);
     buffer.makeCurrent();
@@ -49,6 +49,7 @@ void MandelbrotImage::generate(int width, int height, qd_real cx, qd_real cy, fl
     shader.setUniformValueArray("colormap", colormap, 256);
     shader.setUniformValue("aspect", GLfloat(width) / GLfloat(height));
     shader.setUniformValue("accuracy", GLint(accuracy));
+    shader.setUniformValue("radius", GLfloat(radius));
     shader.setUniformValue("scale", GLfloat(scale));
 
     static GLfloat const vertices[] = {
@@ -114,9 +115,9 @@ void MandelbrotImage::generate(int width, int height, qd_real cx, qd_real cy, fl
     buffer.doneCurrent();
 }
 
-void MandelbrotImage::generate(QSize size, qd_real cx, qd_real cy, float scale, int accuracy)
+void MandelbrotImage::generate(QSize size, qd_real cx, qd_real cy, float scale, int accuracy, float radius)
 {
-    generate(size.width(), size.height(), cx, cy, scale, accuracy);
+    generate(size.width(), size.height(), cx, cy, scale, accuracy, radius);
 }
 
 QVector3D MandelbrotImage::fire(double f)

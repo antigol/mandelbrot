@@ -5,6 +5,7 @@ in vec2 a;
 uniform float center[8];
 uniform vec3 colormap[256];
 uniform int accuracy;
+uniform float radius;
 
 out vec4 color;
 
@@ -31,7 +32,7 @@ void main(void)
         vec4 x2 = mul_qf_qf(x, x);
         vec4 y2 = mul_qf_qf(y, y);
         vec4 lt = add_qf_qf(x2, y2);
-        if (greater_than_qf_f(lt, 4.0))
+        if (greater_than_qf_f(lt, radius))
             break;
 
         vec4 xtemp = add_qf_qf(x2, -y2);

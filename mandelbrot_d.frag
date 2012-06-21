@@ -5,6 +5,7 @@ in vec2 a;
 uniform double center[4];
 uniform vec3 colormap[256];
 uniform int accuracy;
+uniform float radius;
 
 out vec4 color;
 
@@ -21,7 +22,7 @@ void main(void)
     do {
         double x2 = x * x;
         double y2 = y * y;
-        if ((x2 + y2) > 4.0)
+        if ((x2 + y2) > radius)
             break;
 
         double xtemp = x2 - y2 + cx;

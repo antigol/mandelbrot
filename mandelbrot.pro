@@ -28,7 +28,7 @@ OTHER_FILES += \
     mandelbrot_df.frag \
     mandelbrot_f.frag \
     mandelbrot_qd.frag \
-    mandelbrot_df.vert
+    mandelbrot_qf.frag
 
 LIBS += -lqd
 

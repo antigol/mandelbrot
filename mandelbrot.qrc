@@ -1,11 +1,13 @@
 <RCC>
-    <qresource prefix="/">
+    <qresource prefix="/frag">
         <file>mandelbrot_dd.frag</file>
         <file>mandelbrot_df.frag</file>
-        <file>mandelbrot_f.vert</file>
         <file>mandelbrot_qd.frag</file>
-        <file>mandelbrot_df.vert</file>
         <file>mandelbrot_d.frag</file>
         <file>mandelbrot_f.frag</file>
+        <file>mandelbrot_qf.frag</file>
+    </qresource>
+    <qresource prefix="/vert">
+        <file>mandelbrot_f.vert</file>
     </qresource>
 </RCC>

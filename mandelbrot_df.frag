@@ -18,10 +18,11 @@ void main(void)
 {
     {
         float u = a.x;
-        float v = a.y;
+        float v = center[0];
 
         float s = u + v;
-        float e = s - u;
+        float bb = s - u;
+        float e = (u - (s - bb)) + (v - bb);
         e = v - e;
 
         if (e == 0.0) {

@@ -96,7 +96,7 @@ void View::wheelEvent(QWheelEvent *e)
     _imove = k * _imove + (1.0 - k) * QPointF(e->pos() - QPoint(width(), height()) / 2);
     update();
 
-    _timer.start(100);
+    _timer.start(150);
 }
 
 #include <QKeyEvent>
@@ -139,9 +139,13 @@ void View::save()
     QString file = QFileDialog::getSaveFileName(this, "Capture", _set.value("file", QDir::homePath()).toString());
     if (!file.isEmpty()) {
         _set.setValue("file", file);
-        _mandelbrot.generate(QApplication::desktop()->screenGeometry().size(),
-                             _cx, _cy, _scale, _accuracy);
+
+        QSize ss = QApplication::desktop()->screenGeometry().size();
+        std::cout << "Generate new image(" << ss.width() << "," << ss.height() << ") Cx(" << _cx << ") Cy(" << _cy << ") Scale(" << _scale << ") Accuracy(" << _accuracy << ")... ";
+        std::cout.flush();
+        _mandelbrot.generate(ss, _cx, _cy, _scale, _accuracy);
         _mandelbrot.image().save(file, 0, 100);
+        std::cout << "Saved!" << std::endl;
     }
 }
 

@@ -19,20 +19,24 @@ void MandelbrotImage::generate(int width, int height, qd_real cx, qd_real cy, fl
     buffer.makeCurrent();
 
     PFNGLUNIFORM1DVPROC glUniform1dv = (PFNGLUNIFORM1DVPROC) QGLContext::currentContext()->getProcAddress("glUniform1dv");
-    glUniform1dv = 0;
+
     //    if (glUniform1dv) {
     //        std::cout << "Yay! Hardware accelerated double precision enabled." << std::endl;
     //    } else {
     //        std::cout << "Arf! Hardware accelerated simple precision only enabled." << std::endl;
     //    }
-//    dd_real test = dd_real(cx[0], cx[1]);
-//    dd_real ta = test + scale;
-//    dd_real tb = test + scale / 2.0;
-//    std::cout << ta - tb << " * 2.0 = " << scale << std::endl;
+    //    dd_real test = dd_real(cx[0], cx[1]);
+    //    dd_real ta = test + scale;
+    //    dd_real tb = test + scale / 2.0;
+    //    std::cout << ta - tb << " * 2.0 = " << scale << std::endl;
 
     QGLShaderProgram shader;
-    shader.addShaderFromSourceFile(QGLShader::Vertex, ":/mandelbrot_f.vert");
-    shader.addShaderFromSourceFile(QGLShader::Fragment, glUniform1dv ? (QUAD ? ":/mandelbrot_qd.frag" : ":/mandelbrot_d.frag") : ":/mandelbrot_df.frag");
+    shader.addShaderFromSourceFile(QGLShader::Vertex, ":/vert/mandelbrot_f.vert");
+    if (QUAD)
+        shader.addShaderFromSourceFile(QGLShader::Fragment, glUniform1dv ? ":/frag/mandelbrot_qd.frag" : ":/frag/mandelbrot_qf.frag");
+    else
+        shader.addShaderFromSourceFile(QGLShader::Fragment, glUniform1dv ? ":/frag/mandelbrot_dd.frag" : ":/frag/mandelbrot_df.frag");
+
     shader.bindAttributeLocation("vertex", 0);
     if (!shader.link())
         qDebug() << "link error" << shader.log();
@@ -67,13 +71,36 @@ void MandelbrotImage::generate(int width, int height, qd_real cx, qd_real cy, fl
             glUniform1dv(shader.uniformLocation("center"), 4, data);
         }
     } else {
-        double split[4];
-        qd::split(cx.x[0], split[0], split[1]);
-        qd::split(cy.x[0], split[2], split[3]);
-        GLfloat data[4] = {
-            split[0], split[1], split[2], split[3]
-        };
-        shader.setUniformValueArray("center", data, 4, 1);
+        if (QUAD) {
+            double hi, lo, s1;
+            GLfloat data[8];
+
+            qd::split(cx[0], hi, lo);
+            data[0] = hi;
+            data[1] = lo;
+            s1 = cx[1] + (cx[0] - double(data[0]) - double(data[1]));
+            qd::split(s1, hi, lo);
+            data[2] = hi;
+            data[3] = lo;
+
+            qd::split(cy[0], hi, lo);
+            data[4] = hi;
+            data[5] = lo;
+            s1 = cy[1] + (cy[0] - double(data[4]) - double(data[5]));
+            qd::split(s1, hi, lo);
+            data[6] = hi;
+            data[7] = lo;
+
+            shader.setUniformValueArray("center", data, 8, 1);
+        } else {
+            double split[4];
+            qd::split(cx.x[0], split[0], split[1]);
+            qd::split(cy.x[0], split[2], split[3]);
+            GLfloat data[4] = {
+                split[0], split[1], split[2], split[3]
+            };
+            shader.setUniformValueArray("center", data, 4, 1);
+        }
     }
 
     glViewport(0, 0, width, height);

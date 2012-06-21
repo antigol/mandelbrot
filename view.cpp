@@ -108,7 +108,7 @@ void View::keyPressEvent(QKeyEvent *e)
         save();
         break;
     case Qt::Key_Plus:
-        if (e->modifiers() & Qt::ShiftModifier) {
+        if (e->modifiers() & Qt::ControlModifier) {
             _radius *= 1.1;
             std::cout << "Radius : " << _radius << std::endl;
         } else {
@@ -118,7 +118,7 @@ void View::keyPressEvent(QKeyEvent *e)
         _timer.start(1000);
         break;
     case Qt::Key_Minus:
-        if (e->modifiers() & Qt::ShiftModifier) {
+        if (e->modifiers() & Qt::ControlModifier) {
             _radius /= 1.1;
             std::cout << "Radius : " << _radius << std::endl;
         } else {
@@ -141,6 +141,13 @@ void View::keyPressEvent(QKeyEvent *e)
         std::cout << "Scale : " << _scale << std::endl;
         update();
         _timer.start(1000);
+        break;
+    case Qt::Key_1:
+    case Qt::Key_2:
+    case Qt::Key_3:
+    case Qt::Key_4:
+        _mandelbrot.setPalette(Mandelbrot::PaletteStyle(Mandelbrot::Fire + e->key() - Qt::Key_1));
+        updateMandelbrotAndDraw();
         break;
     }
 }

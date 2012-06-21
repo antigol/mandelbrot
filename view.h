@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QTimer>
 #include <QSettings>
-#include "mandelbrotimage.h"
+#include "mandelbrot.h"
 
 class View : public QWidget
 {
@@ -29,7 +29,7 @@ private slots:
     void updateMandelbrotAndDraw();
 
 private:
-    MandelbrotImage _mandelbrot;
+    Mandelbrot _mandelbrot;
 
     QPointF _imove;
     qreal _iscale;

@@ -1,34 +1,33 @@
-#include "mandelbrotimage.h"
+#include "mandelbrot.h"
+#include "palette.h"
 #include <QGLShaderProgram>
 
-#define QUAD false
+#define QUAD true
 
-MandelbrotImage::MandelbrotImage(QObject *parent) :
-    QObject(parent)
+void splitff(double a, float &hi, float &lo)
 {
+    double temp = 536870913.0 * a; // 2^29 + 1
+    hi = temp - (temp - a);
+    lo = a - hi;
 }
 
-const QImage &MandelbrotImage::image() const
+Mandelbrot::Mandelbrot(QObject *parent) :
+    QObject(parent)
+{
+    setPalette(Fire);
+}
+
+const QImage &Mandelbrot::image() const
 {
     return _image;
 }
 
-void MandelbrotImage::generate(int width, int height, qd_real cx, qd_real cy, float scale, int accuracy, float radius)
+void Mandelbrot::generate(int width, int height, qd_real cx, qd_real cy, float scale, int accuracy, float radius)
 {
     QGLPixelBuffer buffer(width, height);
     buffer.makeCurrent();
 
     PFNGLUNIFORM1DVPROC glUniform1dv = (PFNGLUNIFORM1DVPROC) QGLContext::currentContext()->getProcAddress("glUniform1dv");
-
-    //    if (glUniform1dv) {
-    //        std::cout << "Yay! Hardware accelerated double precision enabled." << std::endl;
-    //    } else {
-    //        std::cout << "Arf! Hardware accelerated simple precision only enabled." << std::endl;
-    //    }
-    //    dd_real test = dd_real(cx[0], cx[1]);
-    //    dd_real ta = test + scale;
-    //    dd_real tb = test + scale / 2.0;
-    //    std::cout << ta - tb << " * 2.0 = " << scale << std::endl;
 
     QGLShaderProgram shader;
     shader.addShaderFromSourceFile(QGLShader::Vertex, ":/vert/mandelbrot_f.vert");
@@ -42,14 +41,10 @@ void MandelbrotImage::generate(int width, int height, qd_real cx, qd_real cy, fl
         qDebug() << "link error" << shader.log();
     shader.bind();
 
-    QVector3D colormap[256];
-    for (int i = 0; i < 256; ++i) {
-        colormap[i] = fire(double(i) / 256.0);
-    }
-    shader.setUniformValueArray("colormap", colormap, 256);
+    shader.setUniformValueArray("colormap", _colormap, 256);
     shader.setUniformValue("aspect", GLfloat(width) / GLfloat(height));
     shader.setUniformValue("accuracy", GLint(accuracy));
-    shader.setUniformValue("radius", GLfloat(radius));
+    shader.setUniformValue("radius", GLfloat(radius*radius));
     shader.setUniformValue("scale", GLfloat(scale));
 
     static GLfloat const vertices[] = {
@@ -73,33 +68,30 @@ void MandelbrotImage::generate(int width, int height, qd_real cx, qd_real cy, fl
         }
     } else {
         if (QUAD) {
-            double hi, lo, s1;
+            float lo;
             GLfloat data[8];
 
-            qd::split(cx[0], hi, lo);
-            data[0] = hi;
-            data[1] = lo;
-            s1 = cx[1] + (cx[0] - double(data[0]) - double(data[1]));
-            qd::split(s1, hi, lo);
-            data[2] = hi;
-            data[3] = lo;
+            splitff(cx[0], data[0], lo);
+            cx -= data[0];
+            splitff(cx[0], data[1], lo);
+            cx -= data[1];
+            splitff(cx[0], data[2], lo);
+            cx -= data[2];
+            splitff(cx[0], data[3], lo);
 
-            qd::split(cy[0], hi, lo);
-            data[4] = hi;
-            data[5] = lo;
-            s1 = cy[1] + (cy[0] - double(data[4]) - double(data[5]));
-            qd::split(s1, hi, lo);
-            data[6] = hi;
-            data[7] = lo;
+            splitff(cy[0], data[4], lo);
+            cy -= data[4];
+            splitff(cy[0], data[5], lo);
+            cy -= data[5];
+            splitff(cy[0], data[6], lo);
+            cy -= data[6];
+            splitff(cy[0], data[7], lo);
 
             shader.setUniformValueArray("center", data, 8, 1);
         } else {
-            double split[4];
-            qd::split(cx.x[0], split[0], split[1]);
-            qd::split(cy.x[0], split[2], split[3]);
-            GLfloat data[4] = {
-                split[0], split[1], split[2], split[3]
-            };
+            GLfloat data[4];
+            splitff(cx[0], data[0], data[1]);
+            splitff(cy[0], data[2], data[3]);
             shader.setUniformValueArray("center", data, 4, 1);
         }
     }
@@ -115,27 +107,50 @@ void MandelbrotImage::generate(int width, int height, qd_real cx, qd_real cy, fl
     buffer.doneCurrent();
 }
 
-void MandelbrotImage::generate(QSize size, qd_real cx, qd_real cy, float scale, int accuracy, float radius)
+void Mandelbrot::generate(QSize size, qd_real cx, qd_real cy, float scale, int accuracy, float radius)
 {
     generate(size.width(), size.height(), cx, cy, scale, accuracy, radius);
 }
 
-QVector3D MandelbrotImage::fire(double f)
+void Mandelbrot::setPalette(Mandelbrot::PaletteStyle pal)
 {
-    double k;
-    if (f <= 0.17) {
-        k = f / 0.17;
-        return (1.0 - k) * QVector3D(0.0f, 0.0f, 0.0f) + k * QVector3D(1.0f, 0.0f, 0.0f);
+    Palette p;
+    switch (pal) {
+    case WaveLength:
+        for (int i = 0; i < 256; ++i) {
+            _colormap[i] = rgbFromWaveLength(380.0 + i * (780.0 - 380.0) / 256.0);
+        }
+        break;
+    case Fire:
+        p.add(0.0, QVector3D(0.0, 0.0, 0.0));
+        p.add(0.17, QVector3D(1.0, 0.0, 0.0));
+        p.add(0.83, QVector3D(1.0, 1.0, 0.0));
+        p.add(1.0, QVector3D(1.0, 1.0, 1.0));
+        for (int i = 0; i < 256; ++i) {
+            _colormap[i] = p.generate(double(i) / 256.0);
+        }
+        break;
+    case Rgb:
+        p.add(0.0, QVector3D(1.0, 0.0, 0.0));
+        p.add(0.333, QVector3D(0.0, 1.0, 0.0));
+        p.add(0.666, QVector3D(0.0, 0.0, 1.0));
+        p.add(1.0, QVector3D(1.0, 0.0, 0.0));
+        for (int i = 0; i < 256; ++i) {
+            _colormap[i] = p.generate(double(i) / 256.0);
+        }
+        break;
+    case BlackAndWite:
+        p.add(0.0, QVector3D(1.0, 1.0, 1.0));
+        p.add(0.5, QVector3D(0.0, 0.0, 0.0));
+        p.add(1.0, QVector3D(1.0, 1.0, 1.0));
+        for (int i = 0; i < 256; ++i) {
+            _colormap[i] = p.generate(double(i) / 256.0);
+        }
+        break;
     }
-    if (f <= 0.83) {
-        k = (f - 0.17) / (0.83 - 0.17);
-        return (1.0 - k) * QVector3D(1.0f, 0.0f, 0.0f) + k * QVector3D(1.0f, 1.0f, 0.0f);
-    }
-    k = (f - 0.83) / (1.0 - 0.83);
-    return (1.0 - k) * QVector3D(1.0f, 1.0f, 0.0f) + k * QVector3D(1.0f, 1.0f, 1.0f);
 }
 
-QVector3D MandelbrotImage::rgbFromWaveLength(double wave)
+QVector3D Mandelbrot::rgbFromWaveLength(double wave)
 {
     double r = 0.0;
     double g = 0.0;

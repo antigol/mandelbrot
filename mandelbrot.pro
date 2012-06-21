@@ -11,12 +11,14 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-    mandelbrotimage.cpp \
-    view.cpp
+    view.cpp \
+    mandelbrot.cpp \
+    palette.cpp
 
 HEADERS  += \
-    mandelbrotimage.h \
-    view.h
+    view.h \
+    mandelbrot.h \
+    palette.h
 
 RESOURCES += \
     mandelbrot.qrc

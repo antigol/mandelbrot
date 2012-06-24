@@ -23,4 +23,5 @@ QVector3D Palette::generate(double f) const
         lc = i.value();
         ++i;
     }
+    return QVector3D();
 }

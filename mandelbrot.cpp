@@ -2,7 +2,7 @@
 #include "palette.h"
 #include <QGLShaderProgram>
 
-#define QUAD true
+#define QUAD false
 
 void splitff(double a, float &hi, float &lo)
 {
@@ -27,7 +27,11 @@ void Mandelbrot::generate(int width, int height, qd_real cx, qd_real cy, float s
     QGLPixelBuffer buffer(width, height);
     buffer.makeCurrent();
 
-    PFNGLUNIFORM1DVPROC glUniform1dv = (PFNGLUNIFORM1DVPROC) QGLContext::currentContext()->getProcAddress("glUniform1dv");
+    PFNGLUNIFORM1DVPROC glUniform1dv;
+    if (QGLFormat::openGLVersionFlags().testFlag(QGLFormat::OpenGL_Version_4_0))
+        glUniform1dv = (PFNGLUNIFORM1DVPROC) QGLContext::currentContext()->getProcAddress("glUniform1dv");
+    else
+        glUniform1dv = 0;
 
     QGLShaderProgram shader;
     shader.addShaderFromSourceFile(QGLShader::Vertex, ":/vert/mandelbrot_f.vert");

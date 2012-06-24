@@ -10,7 +10,6 @@ uniform float radius;
 out vec4 color;
 
 vec2 add_df_f(in vec2 a, in float b);
-vec2 mul_df_f(in vec2 a, in float b);
 vec2 add_df_df(in vec2 a, in vec2 b);
 vec2 mul_df_df(in vec2 a, in vec2 b);
 bool greater_than_df_f(in vec2 a, in float b);
@@ -39,7 +38,7 @@ void main(void)
         xtemp = add_df_df(xtemp, cx);
 
         y = mul_df_df(x, y);
-        y = mul_df_f(y, 2.0);
+        y *= 2.0;
         y = add_df_df(y, cy);
 
         x = xtemp;
@@ -95,16 +94,6 @@ vec2 add_df_f(in vec2 a, in float b)
     s2 += a.y;
     s1 = quick_two_sum(s1, s2, s2);
     return vec2(s1, s2);
-}
-
-vec2 mul_df_f(in vec2 a, in float b)
-{
-    float p1, p2;
-
-    p1 = two_prod(a.x, b, p2);
-    p2 += (a.y * b);
-    p1 = quick_two_sum(p1, p2, p2);
-    return vec2(p1, p2);
 }
 
 vec2 add_df_df(in vec2 a, in vec2 b)

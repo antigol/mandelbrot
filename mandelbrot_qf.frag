@@ -39,7 +39,7 @@ void main(void)
         xtemp = add_qf_qf(xtemp, cx);
 
         y = mul_qf_qf(x, y);
-        y = mul_qf_f(y, 2.0);
+        y *= 2.0;
         y = add_qf_qf(y, cy);
 
         x = xtemp;

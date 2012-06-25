@@ -12,7 +12,7 @@ out vec4 color;
 vec2 add_df_f(in vec2 a, in float b);
 vec2 add_df_df(in vec2 a, in vec2 b);
 vec2 mul_df_df(in vec2 a, in vec2 b);
-bool greater_than_df_f(in vec2 a, in float b);
+vec2 sqr_df(in vec2 a);
 
 void main(void)
 {
@@ -28,10 +28,10 @@ void main(void)
     int iteration = 0;
 
     do {
-        vec2 x2 = mul_df_df(x, x);
-        vec2 y2 = mul_df_df(y, y);
-        vec2 lt = add_df_df(x2, y2);
-        if (greater_than_df_f(lt, radius))
+        vec2 x2 = sqr_df(x);
+        vec2 y2 = sqr_df(y);
+
+        if (x2.x + y2.x > radius)
             break;
 
         vec2 xtemp = add_df_df(x2, -y2);
@@ -116,7 +116,21 @@ vec2 mul_df_df(in vec2 a, in vec2 b)
     return vec2(p1, p2);
 }
 
-bool greater_than_df_f(in vec2 a, in float b)
+float two_sqr(in float a, out float err) {
+    float hi, lo;
+    float q = a * a;
+    split(a, hi, lo);
+    err = ((hi * hi - q) + 2.0 * hi * lo) + lo * lo;
+    return q;
+}
+
+vec2 sqr_df(in vec2 a)
 {
-    return (a.x > b || (a.x == b && a.y > 0.0));
+    float p1, p2;
+    float s1, s2;
+    p1 = two_sqr(a.x, p2);
+    p2 += 2.0 * a.x * a.y;
+    p2 += a.y * a.y;
+    s1 = quick_two_sum(p1, p2, s2);
+    return vec2(s1, s2);
 }

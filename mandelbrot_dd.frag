@@ -14,7 +14,7 @@ out vec4 color;
 dvec2 add_dd_d(in dvec2 a, in double b);
 dvec2 add_dd_dd(in dvec2 a, in dvec2 b);
 dvec2 mul_dd_dd(in dvec2 a, in dvec2 b);
-bool greater_than_dd_d(in dvec2 a, in double b);
+dvec2 sqr_dd(in dvec2 a);
 
 void main(void)
 {
@@ -30,10 +30,10 @@ void main(void)
     int iteration = 0;
 
     do {
-        dvec2 x2 = mul_dd_dd(x, x);
-        dvec2 y2 = mul_dd_dd(y, y);
-        dvec2 lt = add_dd_dd(x2, y2);
-        if (greater_than_dd_d(lt, radius))
+        dvec2 x2 = sqr_dd(x);
+        dvec2 y2 = sqr_dd(y);
+
+        if (x2.x + y2.x > radius)
             break;
 
         dvec2 xtemp = add_dd_dd(x2, -y2);
@@ -118,7 +118,21 @@ dvec2 mul_dd_dd(in dvec2 a, in dvec2 b)
     return dvec2(p1, p2);
 }
 
-bool greater_than_dd_d(in dvec2 a, in double b)
+double two_sqr(in double a, out double err) {
+    double hi, lo;
+    double q = a * a;
+    split(a, hi, lo);
+    err = ((hi * hi - q) + 2.0 * hi * lo) + lo * lo;
+    return q;
+}
+
+dvec2 sqr_dd(in dvec2 a)
 {
-    return (a.x > b || (a.x == b && a.y > 0.0));
+    double p1, p2;
+    double s1, s2;
+    p1 = two_sqr(a.x, p2);
+    p2 += 2.0 * a.x * a.y;
+    p2 += a.y * a.y;
+    s1 = quick_two_sum(p1, p2, s2);
+    return dvec2(s1, s2);
 }

@@ -1,6 +1,5 @@
 #include "mandelbrot.h"
 #include "palette.h"
-#include <QGLShaderProgram>
 
 void splitff(double a, float &hi, float &lo)
 {
@@ -15,6 +14,10 @@ Mandelbrot::Mandelbrot(QObject *parent) :
     setPalette(Fire);
 }
 
+Mandelbrot::~Mandelbrot()
+{
+}
+
 const QImage &Mandelbrot::image() const
 {
     return _image;
@@ -22,7 +25,12 @@ const QImage &Mandelbrot::image() const
 
 void Mandelbrot::generate(int width, int height, qd_real cx, qd_real cy, float scale, int accuracy, float radius, bool quad)
 {
-    QGLPixelBuffer buffer(width, height);
+    generate(QSize(width, height), cx, cy, scale, accuracy, radius, quad);
+}
+
+void Mandelbrot::generate(QSize size, qd_real cx, qd_real cy, float scale, int accuracy, float radius, bool quad)
+{
+    QGLPixelBuffer buffer(size);
     buffer.makeCurrent();
 
     PFNGLUNIFORM1DVPROC glUniform1dv;
@@ -47,7 +55,7 @@ void Mandelbrot::generate(int width, int height, qd_real cx, qd_real cy, float s
     shader.bind();
 
     shader.setUniformValueArray("colormap", _colormap, 256);
-    shader.setUniformValue("aspect", GLfloat(width) / GLfloat(height));
+    shader.setUniformValue("aspect", GLfloat(size.width()) / GLfloat(size.height()));
     shader.setUniformValue("accuracy", GLint(accuracy));
     shader.setUniformValue("radius", GLfloat(radius*radius));
     shader.setUniformValue("scale", GLfloat(scale));
@@ -101,7 +109,7 @@ void Mandelbrot::generate(int width, int height, qd_real cx, qd_real cy, float s
         }
     }
 
-    glViewport(0, 0, width, height);
+    glViewport(0, 0, size.width(), size.height());
     glClear(GL_COLOR_BUFFER_BIT);
 
     shader.enableAttributeArray(0);
@@ -110,11 +118,6 @@ void Mandelbrot::generate(int width, int height, qd_real cx, qd_real cy, float s
 
     _image = buffer.toImage();
     buffer.doneCurrent();
-}
-
-void Mandelbrot::generate(QSize size, qd_real cx, qd_real cy, float scale, int accuracy, float radius, bool quad)
-{
-    generate(size.width(), size.height(), cx, cy, scale, accuracy, radius, quad);
 }
 
 void Mandelbrot::setPalette(Mandelbrot::PaletteStyle pal)

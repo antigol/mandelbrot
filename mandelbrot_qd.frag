@@ -14,7 +14,7 @@ out vec4 color;
 dvec4 add_qd_d(in dvec4 a, in double b);
 dvec4 add_qd_qd(in dvec4 a, in dvec4 b);
 dvec4 mul_qd_qd(in dvec4 a, in dvec4 b);
-bool greater_than_qd_d(in dvec4 a, in double b);
+dvec4 sqr_qd(in dvec4 a);
 
 void main(void)
 {
@@ -30,10 +30,10 @@ void main(void)
     int iteration = 0;
 
     do {
-        dvec4 x2 = mul_qd_qd(x, x);
-        dvec4 y2 = mul_qd_qd(y, y);
-        dvec4 lt = add_qd_qd(x2, y2);
-        if (greater_than_qd_d(lt, radius))
+        dvec4 x2 = sqr_qd(x);
+        dvec4 y2 = sqr_qd(y);
+
+        if (x2.x + y2.x > radius)
             break;
 
         dvec4 xtemp = add_qd_qd(x2, -y2);
@@ -69,11 +69,9 @@ double quick_two_sum(in double a, in double b, out double err)
     return s;
 }
 
-void renorm(inout double c0, inout double c1, inout double c2, inout double c3, inout double c4)
+void renorm(inout double c0, inout double c1, inout double c2, inout double c3, in double c4)
 {
     double s0, s1, s2 = 0.0, s3 = 0.0;
-
-    //    if (QD_ISINF(c0)) return;
 
     s0 = quick_two_sum(c3, c4, c4);
     s0 = quick_two_sum(c2, s0, c3);
@@ -133,7 +131,6 @@ dvec4 add_qd_d(in dvec4 a, in double b)
     c3 = two_sum(a.w, e, e);
 
     renorm(c0, c1, c2, c3, e);
-
     return dvec4(c0, c1, c2, c3);
 }
 
@@ -217,7 +214,6 @@ dvec4 add_qd_qd(in dvec4 a, in dvec4 b)
     three_sum2(s3, t0, t2);
     t0 = t0 + t1 + t3;
 
-    /* renormalize */
     renorm(s0, s1, s2, s3, t0);
     return dvec4(s0, s1, s2, s3);
 }
@@ -285,7 +281,54 @@ dvec4 mul_qd_qd(in dvec4 a, in dvec4 b)
     return dvec4(p0, p1, s0, t0);
 }
 
-bool greater_than_qd_d(in dvec4 a, in double b)
+double two_sqr(in double a, out double err)
 {
-    return a.x > b || (a.x == b && (a.y > 0.0 || (a.y == 0.0 && (a.z > 0.0 || (a.z == 0.0 && a.w > 0.0)))));
+    double hi, lo;
+    double q = a * a;
+    split(a, hi, lo);
+    err = ((hi * hi - q) + 2.0 * hi * lo) + lo * lo;
+    return q;
+}
+
+dvec4 sqr_qd(in dvec4 a)
+{
+    double p0, p1, p2, p3, p4, p5;
+    double q0, q1, q2, q3;
+    double s0, s1;
+    double t0, t1;
+
+    p0 = two_sqr(a.x, q0);
+    p1 = two_prod(2.0 * a.x, a.y, q1);
+    p2 = two_prod(2.0 * a.x, a.z, q2);
+    p3 = two_sqr(a.y, q3);
+
+    p1 = two_sum(q0, p1, q0);
+
+    q0 = two_sum(q0, q1, q1);
+    p2 = two_sum(p2, p3, p3);
+
+    s0 = two_sum(q0, p2, t0);
+    s1 = two_sum(q1, p3, t1);
+
+    s1 = two_sum(s1, t0, t0);
+    t0 += t1;
+
+    s1 = quick_two_sum(s1, t0, t0);
+    p2 = quick_two_sum(s0, s1, t1);
+    p3 = quick_two_sum(t1, t0, q0);
+
+    p4 = 2.0 * a.x * a.w;
+    p5 = 2.0 * a.y * a.z;
+
+    p4 = two_sum(p4, p5, p5);
+    q2 = two_sum(q2, q3, q3);
+
+    t0 = two_sum(p4, q2, t1);
+    t1 = t1 + p5 + q3;
+
+    p3 = two_sum(p3, t0, p4);
+    p4 = p4 + q0 + t1;
+
+    renorm(p0, p1, p2, p3, p4);
+    return dvec4(p0, p1, p2, p3);
 }

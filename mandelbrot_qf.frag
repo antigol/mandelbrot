@@ -10,10 +10,9 @@ uniform float radius;
 out vec4 color;
 
 vec4 add_qf_f(in vec4 a, in float b);
-vec4 mul_qf_f(in vec4 a, in float b);
 vec4 add_qf_qf(in vec4 a, in vec4 b);
 vec4 mul_qf_qf(in vec4 a, in vec4 b);
-bool greater_than_qf_f(in vec4 a, in float b);
+vec4 sqr_qf(in vec4 a);
 
 void main(void)
 {
@@ -29,10 +28,10 @@ void main(void)
     int iteration = 0;
 
     do {
-        vec4 x2 = mul_qf_qf(x, x);
-        vec4 y2 = mul_qf_qf(y, y);
-        vec4 lt = add_qf_qf(x2, y2);
-        if (greater_than_qf_f(lt, radius))
+        vec4 x2 = sqr_qf(x);
+        vec4 y2 = sqr_qf(y);
+
+        if (x2.x + y2.x > radius)
             break;
 
         vec4 xtemp = add_qf_qf(x2, -y2);
@@ -129,8 +128,7 @@ vec4 add_qf_f(in vec4 a, in float b)
     c2 = two_sum(a.z, e, e);
     c3 = two_sum(a.w, e, e);
 
-//    renorm(c0, c1, c2, c3, e);
-
+    renorm(c0, c1, c2, c3, e);
     return vec4(c0, c1, c2, c3);
 }
 
@@ -168,33 +166,6 @@ void three_sum2(inout float a, inout float b, inout float c)
     t1 = two_sum(a, b, t2);
     a  = two_sum(c, t1, t3);
     b = t2 + t3;
-}
-
-vec4 mul_qf_f(in vec4 a, in float b)
-{
-    float p0, p1, p2, p3;
-    float q0, q1, q2;
-    float s0, s1, s2, s3, s4;
-
-    p0 = two_prod(a.x, b, q0);
-    p1 = two_prod(a.y, b, q1);
-    p2 = two_prod(a.z, b, q2);
-    p3 = a.w * b;
-
-    s0 = p0;
-
-    s1 = two_sum(q0, p1, s2);
-
-    three_sum(s2, q1, p2);
-
-    three_sum2(q1, q2, p3);
-    s3 = q1;
-
-    s4 = q2 + p2;
-
-//    renorm(s0, s1, s2, s3, s4);
-
-    return vec4(s0, s1, s2, s3);
 }
 
 vec4 add_qf_qf(in vec4 a, in vec4 b)
@@ -241,8 +212,7 @@ vec4 add_qf_qf(in vec4 a, in vec4 b)
     three_sum2(s3, t0, t2);
     t0 = t0 + t1 + t3;
 
-//    renorm(s0, s1, s2, s3, t0);
-
+    renorm(s0, s1, s2, s3, t0);
     return vec4(s0, s1, s2, s3);
 }
 
@@ -309,7 +279,54 @@ vec4 mul_qf_qf(in vec4 a, in vec4 b)
     return vec4(p0, p1, s0, t0);
 }
 
-bool greater_than_qf_f(in vec4 a, in float b)
+float two_sqr(in float a, out float err)
 {
-    return a.x > b || (a.x == b && (a.y > 0.0 || (a.y == 0.0 && (a.z > 0.0 || (a.z == 0.0 && a.w > 0.0)))));
+    float hi, lo;
+    float q = a * a;
+    split(a, hi, lo);
+    err = ((hi * hi - q) + 2.0 * hi * lo) + lo * lo;
+    return q;
+}
+
+vec4 sqr_qf(in vec4 a)
+{
+    float p0, p1, p2, p3, p4, p5;
+    float q0, q1, q2, q3;
+    float s0, s1;
+    float t0, t1;
+
+    p0 = two_sqr(a.x, q0);
+    p1 = two_prod(2.0 * a.x, a.y, q1);
+    p2 = two_prod(2.0 * a.x, a.z, q2);
+    p3 = two_sqr(a.y, q3);
+
+    p1 = two_sum(q0, p1, q0);
+
+    q0 = two_sum(q0, q1, q1);
+    p2 = two_sum(p2, p3, p3);
+
+    s0 = two_sum(q0, p2, t0);
+    s1 = two_sum(q1, p3, t1);
+
+    s1 = two_sum(s1, t0, t0);
+    t0 += t1;
+
+    s1 = quick_two_sum(s1, t0, t0);
+    p2 = quick_two_sum(s0, s1, t1);
+    p3 = quick_two_sum(t1, t0, q0);
+
+    p4 = 2.0 * a.x * a.w;
+    p5 = 2.0 * a.y * a.z;
+
+    p4 = two_sum(p4, p5, p5);
+    q2 = two_sum(q2, q3, q3);
+
+    t0 = two_sum(p4, q2, t1);
+    t1 = t1 + p5 + q3;
+
+    p3 = two_sum(p3, t0, p4);
+    p4 = p4 + q0 + t1;
+
+    renorm(p0, p1, p2, p3, p4);
+    return vec4(p0, p1, p2, p3);
 }

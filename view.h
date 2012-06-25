@@ -38,6 +38,7 @@ private:
     float _scale;
     int _accuracy;
     float _radius;
+    bool _quad;
 
     QPointF _lastMousePosition;
     QTimer _timer;

@@ -12,7 +12,6 @@ uniform float radius;
 out vec4 color;
 
 dvec4 add_qd_d(in dvec4 a, in double b);
-dvec4 mul_qd_d(in dvec4 a, in double b);
 dvec4 add_qd_qd(in dvec4 a, in dvec4 b);
 dvec4 mul_qd_qd(in dvec4 a, in dvec4 b);
 bool greater_than_qd_d(in dvec4 a, in double b);
@@ -41,7 +40,7 @@ void main(void)
         xtemp = add_qd_qd(xtemp, cx);
 
         y = mul_qd_qd(x, y);
-        y = mul_qd_d(y, 2.0);
+        y *= 2.0;
         y = add_qd_qd(y, cy);
 
         x = xtemp;
@@ -172,32 +171,6 @@ void three_sum2(inout double a, inout double b, inout double c)
     t1 = two_sum(a, b, t2);
     a  = two_sum(c, t1, t3);
     b = t2 + t3;
-}
-
-dvec4 mul_qd_d(in dvec4 a, in double b)
-{
-    double p0, p1, p2, p3;
-    double q0, q1, q2;
-    double s0, s1, s2, s3, s4;
-
-    p0 = two_prod(a.x, b, q0);
-    p1 = two_prod(a.y, b, q1);
-    p2 = two_prod(a.z, b, q2);
-    p3 = a.w * b;
-
-    s0 = p0;
-
-    s1 = two_sum(q0, p1, s2);
-
-    three_sum(s2, q1, p2);
-
-    three_sum2(q1, q2, p3);
-    s3 = q1;
-
-    s4 = q2 + p2;
-
-    renorm(s0, s1, s2, s3, s4);
-    return dvec4(s0, s1, s2, s3);
 }
 
 dvec4 add_qd_qd(in dvec4 a, in dvec4 b)

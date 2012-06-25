@@ -68,11 +68,9 @@ float quick_two_sum(in float a, in float b, out float err)
     return s;
 }
 
-void renorm(inout float c0, inout float c1, inout float c2, inout float c3, inout float c4)
+void renorm(inout float c0, inout float c1, inout float c2, inout float c3, in float c4)
 {
     float s0, s1, s2 = 0.0, s3 = 0.0;
-
-    //    if (QD_ISINF(c0)) return;
 
     s0 = quick_two_sum(c3, c4, c4);
     s0 = quick_two_sum(c2, s0, c3);
@@ -131,7 +129,7 @@ vec4 add_qf_f(in vec4 a, in float b)
     c2 = two_sum(a.z, e, e);
     c3 = two_sum(a.w, e, e);
 
-    renorm(c0, c1, c2, c3, e);
+//    renorm(c0, c1, c2, c3, e);
 
     return vec4(c0, c1, c2, c3);
 }
@@ -194,7 +192,8 @@ vec4 mul_qf_f(in vec4 a, in float b)
 
     s4 = q2 + p2;
 
-    renorm(s0, s1, s2, s3, s4);
+//    renorm(s0, s1, s2, s3, s4);
+
     return vec4(s0, s1, s2, s3);
 }
 
@@ -242,8 +241,8 @@ vec4 add_qf_qf(in vec4 a, in vec4 b)
     three_sum2(s3, t0, t2);
     t0 = t0 + t1 + t3;
 
-    /* renormalize */
-    renorm(s0, s1, s2, s3, t0);
+//    renorm(s0, s1, s2, s3, t0);
+
     return vec4(s0, s1, s2, s3);
 }
 

@@ -2,8 +2,6 @@
 #include "palette.h"
 #include <QGLShaderProgram>
 
-#define QUAD false
-
 void splitff(double a, float &hi, float &lo)
 {
     double temp = 536870913.0 * a; // 2^29 + 1
@@ -22,7 +20,7 @@ const QImage &Mandelbrot::image() const
     return _image;
 }
 
-void Mandelbrot::generate(int width, int height, qd_real cx, qd_real cy, float scale, int accuracy, float radius)
+void Mandelbrot::generate(int width, int height, qd_real cx, qd_real cy, float scale, int accuracy, float radius, bool quad)
 {
     QGLPixelBuffer buffer(width, height);
     buffer.makeCurrent();
@@ -33,12 +31,15 @@ void Mandelbrot::generate(int width, int height, qd_real cx, qd_real cy, float s
     else
         glUniform1dv = 0;
 
+
+
     QGLShaderProgram shader;
     shader.addShaderFromSourceFile(QGLShader::Vertex, ":/vert/mandelbrot_f.vert");
-    if (QUAD)
-        shader.addShaderFromSourceFile(QGLShader::Fragment, glUniform1dv ? ":/frag/mandelbrot_qd.frag" : ":/frag/mandelbrot_qf.frag");
-    else
-        shader.addShaderFromSourceFile(QGLShader::Fragment, glUniform1dv ? ":/frag/mandelbrot_dd.frag" : ":/frag/mandelbrot_df.frag");
+    if (glUniform1dv) {
+        shader.addShaderFromSourceFile(QGLShader::Fragment, quad ? ":/frag/mandelbrot_qd.frag" : ":/frag/mandelbrot_dd.frag");
+    } else {
+        shader.addShaderFromSourceFile(QGLShader::Fragment, quad ? ":/frag/mandelbrot_qf.frag" : ":/frag/mandelbrot_df.frag");
+    }
 
     shader.bindAttributeLocation("vertex", 0);
     if (!shader.link())
@@ -57,7 +58,7 @@ void Mandelbrot::generate(int width, int height, qd_real cx, qd_real cy, float s
     shader.setAttributeArray(0, vertices, 2);
 
     if (glUniform1dv) {
-        if (QUAD) {
+        if (quad) {
             GLdouble data[8] = {
                 cx[0], cx[1], cx[2], cx[3],
                 cy[0], cy[1], cy[2], cy[3]
@@ -71,7 +72,7 @@ void Mandelbrot::generate(int width, int height, qd_real cx, qd_real cy, float s
             glUniform1dv(shader.uniformLocation("center"), 4, data);
         }
     } else {
-        if (QUAD) {
+        if (quad) {
             float lo;
             GLfloat data[8];
 
@@ -111,9 +112,9 @@ void Mandelbrot::generate(int width, int height, qd_real cx, qd_real cy, float s
     buffer.doneCurrent();
 }
 
-void Mandelbrot::generate(QSize size, qd_real cx, qd_real cy, float scale, int accuracy, float radius)
+void Mandelbrot::generate(QSize size, qd_real cx, qd_real cy, float scale, int accuracy, float radius, bool quad)
 {
-    generate(size.width(), size.height(), cx, cy, scale, accuracy, radius);
+    generate(size.width(), size.height(), cx, cy, scale, accuracy, radius, quad);
 }
 
 void Mandelbrot::setPalette(Mandelbrot::PaletteStyle pal)

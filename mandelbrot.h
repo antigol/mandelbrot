@@ -15,8 +15,8 @@ public:
     explicit Mandelbrot(QObject *parent = 0);
 
     const QImage &image() const;
-    void generate(int width, int height, qd_real cx, qd_real cy, float scale, int accuracy, float radius);
-    void generate(QSize size, qd_real cx, qd_real cy, float scale, int accuracy, float radius);
+    void generate(int width, int height, qd_real cx, qd_real cy, float scale, int accuracy, float radius, bool quad = false);
+    void generate(QSize size, qd_real cx, qd_real cy, float scale, int accuracy, float radius, bool quad = false);
 
     enum PaletteStyle {
         Fire,

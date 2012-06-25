@@ -12,7 +12,6 @@ uniform float radius;
 out vec4 color;
 
 dvec2 add_dd_d(in dvec2 a, in double b);
-dvec2 mul_dd_d(in dvec2 a, in double b);
 dvec2 add_dd_dd(in dvec2 a, in dvec2 b);
 dvec2 mul_dd_dd(in dvec2 a, in dvec2 b);
 bool greater_than_dd_d(in dvec2 a, in double b);
@@ -41,7 +40,7 @@ void main(void)
         xtemp = add_dd_dd(xtemp, cx);
 
         y = mul_dd_dd(x, y);
-        y = mul_dd_d(y, 2.0);
+        y *= 2.0;
         y = add_dd_dd(y, cy);
 
         x = xtemp;
@@ -97,16 +96,6 @@ dvec2 add_dd_d(in dvec2 a, in double b)
     s2 += a.y;
     s1 = quick_two_sum(s1, s2, s2);
     return dvec2(s1, s2);
-}
-
-dvec2 mul_dd_d(in dvec2 a, in double b)
-{
-    double p1, p2;
-
-    p1 = two_prod(a.x, b, p2);
-    p2 += (a.y * b);
-    p1 = quick_two_sum(p1, p2, p2);
-    return dvec2(p1, p2);
 }
 
 dvec2 add_dd_dd(in dvec2 a, in dvec2 b)

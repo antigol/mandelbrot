@@ -6,6 +6,7 @@
 #include <QInputDialog>
 #include <QFileDialog>
 #include <QDir>
+#include <QTime>
 #include <iostream>
 
 View::View(QWidget *parent) :
@@ -18,6 +19,7 @@ View::View(QWidget *parent) :
     _scale = 1.0;
     _accuracy = 100;//_set.value("accuracy", 100).toInt();
     _radius = 4.0;
+    _quad = false;
 
     _timer.setSingleShot(true);
     connect(&_timer, SIGNAL(timeout()), this, SLOT(updateMandelbrotAndDraw()));
@@ -147,7 +149,13 @@ void View::keyPressEvent(QKeyEvent *e)
     case Qt::Key_3:
     case Qt::Key_4:
         _mandelbrot.setPalette(Mandelbrot::PaletteStyle(Mandelbrot::Fire + e->key() - Qt::Key_1));
-        updateMandelbrotAndDraw();
+        std::cout << "palette changed" << std::endl;
+        _timer.start(1000);
+        break;
+    case Qt::Key_Q:
+        _quad = !_quad;
+        std::cout << "quad-floating point " << (_quad ? "en":"dis") << "able" << std::endl;
+        _timer.start(1000);
         break;
     }
 }
@@ -159,9 +167,9 @@ void View::save()
         _set.setValue("file", file);
 
         QSize ss = QApplication::desktop()->screenGeometry().size();
-        std::cout << "Generate new image(" << ss.width() << "," << ss.height() << ") Cx(" << _cx << ") Cy(" << _cy << ") Scale(" << _scale << ") Accuracy(" << _accuracy << ") Radius(" << _radius << ")... ";
+        std::cout << "Generate new image(" << ss.width() << "," << ss.height() << ") Cx(" << _cx << ") Cy(" << _cy << ") Scale(" << _scale << ") Accuracy(" << _accuracy << ") Radius(" << _radius << ") quad(" << (_quad ? "en":"dis") << "able)... ";
         std::cout.flush();
-        _mandelbrot.generate(ss, _cx, _cy, _scale, _accuracy, _radius);
+        _mandelbrot.generate(ss, _cx, _cy, _scale, _accuracy, _radius, _quad);
         _mandelbrot.image().save(file, 0, 100);
         std::cout << "Saved!" << std::endl;
     }
@@ -169,15 +177,17 @@ void View::save()
 
 void View::updateMandelbrot()
 {
-    std::cout << "Generate new image. Cx(" << _cx << ") Cy(" << _cy << ") Scale(" << _scale << ") Accuracy(" << _accuracy << ") Radius(" << _radius << ")... ";
+    std::cout << "Generate new image. Cx(" << _cx << ") Cy(" << _cy << ") Scale(" << _scale << ") Accuracy(" << _accuracy << ") Radius(" << _radius << ") quad(" << (_quad ? "en":"dis") << "able) ... ";
     std::cout.flush();
 
-    _mandelbrot.generate(size(), _cx, _cy, _scale, _accuracy, _radius);
+    QTime time;
+    time.start();
+    _mandelbrot.generate(size(), _cx, _cy, _scale, _accuracy, _radius, _quad);
     _imove.setX(0.0);
     _imove.setY(0.0);
     _iscale = 1.0;
 
-    std::cout << "Ok!" << std::endl;
+    std::cout << "Ok! " << time.elapsed() << "ms" << std::endl;
 }
 
 void View::updateMandelbrotAndDraw()

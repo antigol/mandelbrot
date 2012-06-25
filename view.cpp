@@ -48,7 +48,7 @@ void View::paintEvent(QPaintEvent *)
     painter.drawImage(targetRect, _mandelbrot.image(), QRectF(_mandelbrot.image().rect()));
 
     QFont f;
-    f.setPointSize(6);
+    f.setPointSize(7);
     painter.setFont(f);
     painter.setPen(Qt::gray);
     painter.drawText(QRectF(rect()),

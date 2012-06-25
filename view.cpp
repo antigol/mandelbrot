@@ -46,6 +46,21 @@ void View::paintEvent(QPaintEvent *)
     targetRect.moveCenter(targetRect.center() + _imove);
 
     painter.drawImage(targetRect, _mandelbrot.image(), QRectF(_mandelbrot.image().rect()));
+
+    QFont f;
+    f.setPointSize(6);
+    painter.setFont(f);
+    painter.setPen(Qt::gray);
+    painter.drawText(QRectF(rect()),
+                     "Keys :\n"
+                     " PageUp/PageDown to zoom\n"
+                     " Plus/Minus for the accuracy (maximum of iterations)\n"
+                     " Return to take a screen size capture\n"
+                     " 1,2,3,4 to change the colors\n"
+                     " Q to switch to the quad mode (increased accuracy)\n"
+                     "Mouse :\n"
+                     " Drag to move\n"
+                     " Wheel to zoom");
 }
 
 #include <QMouseEvent>

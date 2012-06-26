@@ -7,7 +7,7 @@
 #include <QtOpenGL/QGLPixelBuffer>
 #include <QtOpenGL/QGLShaderProgram>
 #include <QVector3D>
-#include <qd/qd_real.h>
+#include "qd/qd_real.h"
 
 class Mandelbrot : public QObject
 {

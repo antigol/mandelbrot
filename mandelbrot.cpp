@@ -81,30 +81,36 @@ void Mandelbrot::generate(QSize size, qd_real cx, qd_real cy, float scale, int a
         }
     } else {
         if (quad) {
-            float lo;
             GLfloat data[8];
 
-            splitff(cx[0], data[0], lo);
+            data[0] = cx[0];
             cx -= data[0];
-            splitff(cx[0], data[1], lo);
+            data[1] = cx[0];
             cx -= data[1];
-            splitff(cx[0], data[2], lo);
+            data[2] = cx[0];
             cx -= data[2];
-            splitff(cx[0], data[3], lo);
+            data[3] = cx[0];
 
-            splitff(cy[0], data[4], lo);
+            data[4] = cy[0];
             cy -= data[4];
-            splitff(cy[0], data[5], lo);
+            data[5] = cy[0];
             cy -= data[5];
-            splitff(cy[0], data[6], lo);
+            data[6] = cy[0];
             cy -= data[6];
-            splitff(cy[0], data[7], lo);
+            data[7] = cy[0];
 
             shader.setUniformValueArray("center", data, 8, 1);
         } else {
             GLfloat data[4];
-            splitff(cx[0], data[0], data[1]);
-            splitff(cy[0], data[2], data[3]);
+
+            data[0] = cx[0];
+            cx -= data[0];
+            data[1] = cx[0];
+
+            data[2] = cy[0];
+            cy -= data[2];
+            data[3] = cy[0];
+
             shader.setUniformValueArray("center", data, 4, 1);
         }
     }

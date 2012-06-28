@@ -18,7 +18,7 @@ View::View(QWidget *parent) :
     _cy = qd_real("0.131825904205311970493132056385139");
     _scale = 1.0;
     _accuracy = 100;//_set.value("accuracy", 100).toInt();
-    _radius = 4.0;
+    _radius = 2.0;
     _quad = false;
 
     _timer.setSingleShot(true);

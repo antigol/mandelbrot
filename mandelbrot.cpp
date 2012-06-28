@@ -1,5 +1,6 @@
 #include "mandelbrot.h"
 #include "palette.h"
+#include <GL/glext.h>
 
 void splitff(double a, float &hi, float &lo)
 {

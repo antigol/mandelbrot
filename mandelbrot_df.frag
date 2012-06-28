@@ -9,6 +9,8 @@ uniform float radius;
 
 out vec4 color;
 
+// fonctions copiées à partir de la librairie QD
+// lien : http://crd-legacy.lbl.gov/~dhbailey/mpdist/
 vec2 add_df_f(in vec2 a, in float b);
 vec2 add_df_df(in vec2 a, in vec2 b);
 vec2 mul_df_df(in vec2 a, in vec2 b);

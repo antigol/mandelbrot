@@ -29,6 +29,9 @@ public:
 
     void setPalette(enum PaletteStyle pal);
 
+signals:
+    void imageChanged();
+
 private:
     QImage _image;
     QVector3D _colormap[256];

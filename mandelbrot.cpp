@@ -81,21 +81,26 @@ void Mandelbrot::generate(QSize size, qd_real cx, qd_real cy, float scale, int a
 
     shader.enableAttributeArray(0);
 
-    QTime time;
+    QTime t;
+    QVector<int> ts;
     for (int y = 0; y < sy; ++y) {
         for (int x = 0; x < sx; ++x) {
-            time.start();
+            t.start();
             int dx = 2 * x - sx + 1;
             int dy = 2 * y - sy + 1;
             setUniformCenter(glUniform1dv, quad, shader, cx + dx * scaleX, cy + dy * scaleY);
 
             glViewport(x * subSize.width(), y * subSize.height(), subSize.width(), subSize.height());
             glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-            qDebug() << QPoint(x, y) << time.elapsed() << "ms";
+            _image = buffer.toImage();
+            ts << t.elapsed();
+            emit imageChanged();
         }
     }
+    qDebug() << ts;
+
     shader.disableAttributeArray(0);
-    _image = buffer.toImage();
+
     buffer.doneCurrent();
 }
 

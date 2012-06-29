@@ -22,9 +22,9 @@ View::View(QWidget *parent) :
     _quad = false;
 
     _timer.setSingleShot(true);
-    connect(&_timer, SIGNAL(timeout()), this, SLOT(updateMandelbrotAndDraw()));
+    connect(&_timer, SIGNAL(timeout()), this, SLOT(redraw()));
 
-    updateMandelbrot();
+//    connect(&_mandelbrot, SIGNAL(imageChanged()), this, SLOT(update()));
 }
 
 View::~View()
@@ -91,8 +91,7 @@ void View::mouseReleaseEvent(QMouseEvent *e)
 {
     QWidget::mouseReleaseEvent(e);
 
-    updateMandelbrot();
-    update();
+    redraw();
 }
 
 #include <QWheelEvent>
@@ -191,7 +190,7 @@ void View::save()
     }
 }
 
-void View::updateMandelbrot()
+void View::redraw()
 {
     std::cout << "Generate new image. Cx(" << _cx << ") Cy(" << _cy << ") Scale(" << _scale << ") Accuracy(" << _accuracy << ") Radius(" << _radius << ") quad(" << (_quad ? "en":"dis") << "able) ... ";
     std::cout.flush();
@@ -204,10 +203,6 @@ void View::updateMandelbrot()
     _iscale = 1.0;
 
     std::cout << "Ok! " << time.elapsed() << "ms" << std::endl;
-}
 
-void View::updateMandelbrotAndDraw()
-{
-    updateMandelbrot();
     update();
 }

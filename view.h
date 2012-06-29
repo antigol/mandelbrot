@@ -25,8 +25,7 @@ protected:
 
 private slots:
     void save();
-    void updateMandelbrot();
-    void updateMandelbrotAndDraw();
+    void redraw();
 
 private:
     Mandelbrot _mandelbrot;

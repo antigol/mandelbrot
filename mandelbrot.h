@@ -8,6 +8,7 @@
 #include <QtOpenGL/QGLShaderProgram>
 #include <QVector3D>
 #include "qd/qd_real.h"
+#include <GL/glext.h>
 
 class Mandelbrot : public QObject
 {
@@ -36,7 +37,7 @@ private:
     QImage _image;
     QVector3D _colormap[256];
 
-    void setUniformCenter(PFNGLUNIFORM1DVPROC glUniform1dv, bool quad, QGLShaderProgram &shader, qd_real cx, qd_real cy);
+    void setUniformCenter(qd_real cx, qd_real cy, PFNGLUNIFORM1DVPROC glUniform1dv, bool quad, QGLShaderProgram &shader);
     QVector3D rgbFromWaveLength(double wave);
 };
 

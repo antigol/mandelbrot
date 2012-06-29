@@ -2,7 +2,6 @@
 #include "palette.h"
 #include <QTime>
 #include <cmath>
-#include <GL/glext.h>
 
 void splitff(double a, float &hi, float &lo)
 {
@@ -88,7 +87,7 @@ void Mandelbrot::generate(QSize size, qd_real cx, qd_real cy, float scale, int a
             t.start();
             int dx = 2 * x - sx + 1;
             int dy = 2 * y - sy + 1;
-            setUniformCenter(glUniform1dv, quad, shader, cx + dx * scaleX, cy + dy * scaleY);
+            setUniformCenter(cx + dx * double(scaleX), cy + dy * double(scaleY), glUniform1dv, quad, shader);
 
             glViewport(x * subSize.width(), y * subSize.height(), subSize.width(), subSize.height());
             glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
@@ -179,7 +178,7 @@ QVector3D Mandelbrot::rgbFromWaveLength(double wave)
     return QVector3D(r, g, b);
 }
 
-void Mandelbrot::setUniformCenter(PFNGLUNIFORM1DVPROC glUniform1dv, bool quad, QGLShaderProgram &shader, qd_real cx, qd_real cy)
+void Mandelbrot::setUniformCenter(qd_real cx, qd_real cy, PFNGLUNIFORM1DVPROC glUniform1dv, bool quad, QGLShaderProgram &shader)
 {
     if (glUniform1dv) {
         if (quad) {

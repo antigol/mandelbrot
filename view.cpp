@@ -40,6 +40,7 @@ void View::resizeEvent(QResizeEvent *)
 void View::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
+
     painter.fillRect(rect(), Qt::darkGreen);
     QSizeF isize = size() * _iscale;
     QRectF targetRect(QPointF(width() - isize.width(), height() - isize.height()) / 2.0, isize);
@@ -184,7 +185,7 @@ void View::save()
         QSize ss = QApplication::desktop()->screenGeometry().size();
         std::cout << "Generate new image(" << ss.width() << "," << ss.height() << ") Cx(" << _cx << ") Cy(" << _cy << ") Scale(" << _scale << ") Accuracy(" << _accuracy << ") Radius(" << _radius << ") quad(" << (_quad ? "en":"dis") << "able)... ";
         std::cout.flush();
-        _mandelbrot.generate(ss, _cx, _cy, _scale, _accuracy, _radius, _quad);
+        _mandelbrot.generate(ss, _cx, _cy, _scale, _accuracy, _radius, _quad, 4, 4);
         _mandelbrot.image().save(file, 0, 100);
         std::cout << "Saved!" << std::endl;
     }
@@ -197,7 +198,7 @@ void View::updateMandelbrot()
 
     QTime time;
     time.start();
-    _mandelbrot.generate(size(), _cx, _cy, _scale, _accuracy, _radius, _quad);
+    _mandelbrot.generate(size(), _cx, _cy, _scale, _accuracy, _radius, _quad, 4, 4);
     _imove.setX(0.0);
     _imove.setY(0.0);
     _iscale = 1.0;

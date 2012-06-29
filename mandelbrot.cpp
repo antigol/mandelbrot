@@ -1,5 +1,7 @@
 #include "mandelbrot.h"
 #include "palette.h"
+#include <QTime>
+#include <cmath>
 #include <GL/glext.h>
 
 void splitff(double a, float &hi, float &lo)
@@ -24,13 +26,20 @@ const QImage &Mandelbrot::image() const
     return _image;
 }
 
-void Mandelbrot::generate(int width, int height, qd_real cx, qd_real cy, float scale, int accuracy, float radius, bool quad)
+void Mandelbrot::generate(int width, int height, qd_real cx, qd_real cy, float scale, int accuracy, float radius, bool quad, int sx, int sy)
 {
-    generate(QSize(width, height), cx, cy, scale, accuracy, radius, quad);
+    generate(QSize(width, height), cx, cy, scale, accuracy, radius, quad, sx, sy);
 }
 
-void Mandelbrot::generate(QSize size, qd_real cx, qd_real cy, float scale, int accuracy, float radius, bool quad)
+void Mandelbrot::generate(QSize size, qd_real cx, qd_real cy, float scale, int accuracy, float radius, bool quad, int sx, int sy)
 {
+    if (size.width() % sx != 0)
+        size.rwidth() += sx - (size.width() % sx);
+    if (size.height() % sy != 0)
+        size.rheight() += sy - (size.height() % sy);
+
+    QSizeF subSize(size.width() / sx, size.height() / sy);
+
     QGLPixelBuffer buffer(size);
     buffer.makeCurrent();
 
@@ -55,74 +64,37 @@ void Mandelbrot::generate(QSize size, qd_real cx, qd_real cy, float scale, int a
         qDebug() << "link error" << shader.log();
     shader.bind();
 
+    GLfloat scaleY = GLfloat(scale) / GLfloat(sy);
+    GLfloat aspect = subSize.width() / subSize.height();
+    GLfloat scaleX = aspect * scaleY;
+
     shader.setUniformValueArray("colormap", _colormap, 256);
-    shader.setUniformValue("aspect", GLfloat(size.width()) / GLfloat(size.height()));
+    shader.setUniformValue("aspect", aspect);
     shader.setUniformValue("accuracy", GLint(accuracy));
     shader.setUniformValue("radius", GLfloat(radius*radius));
-    shader.setUniformValue("scale", GLfloat(scale));
+    shader.setUniformValue("scale", scaleY);
 
     static GLfloat const vertices[] = {
         -1, -1, 1, -1, 1, 1, -1, 1
     };
     shader.setAttributeArray(0, vertices, 2);
 
-    if (glUniform1dv) {
-        if (quad) {
-            GLdouble data[8] = {
-                cx[0], cx[1], cx[2], cx[3],
-                cy[0], cy[1], cy[2], cy[3]
-            };
-            glUniform1dv(shader.uniformLocation("center"), 8, data);
-        } else {
-            GLdouble data[4] = {
-                cx[0], cx[1],
-                cy[0], cy[1]
-            };
-            glUniform1dv(shader.uniformLocation("center"), 4, data);
-        }
-    } else {
-        if (quad) {
-            GLfloat data[8];
+    shader.enableAttributeArray(0);
 
-            data[0] = cx[0];
-            cx -= data[0];
-            data[1] = cx[0];
-            cx -= data[1];
-            data[2] = cx[0];
-            cx -= data[2];
-            data[3] = cx[0];
+    QTime time;
+    for (int y = 0; y < sy; ++y) {
+        for (int x = 0; x < sx; ++x) {
+            time.start();
+            int dx = 2 * x - sx + 1;
+            int dy = 2 * y - sy + 1;
+            setUniformCenter(glUniform1dv, quad, shader, cx + dx * scaleX, cy + dy * scaleY);
 
-            data[4] = cy[0];
-            cy -= data[4];
-            data[5] = cy[0];
-            cy -= data[5];
-            data[6] = cy[0];
-            cy -= data[6];
-            data[7] = cy[0];
-
-            shader.setUniformValueArray("center", data, 8, 1);
-        } else {
-            GLfloat data[4];
-
-            data[0] = cx[0];
-            cx -= data[0];
-            data[1] = cx[0];
-
-            data[2] = cy[0];
-            cy -= data[2];
-            data[3] = cy[0];
-
-            shader.setUniformValueArray("center", data, 4, 1);
+            glViewport(x * subSize.width(), y * subSize.height(), subSize.width(), subSize.height());
+            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+            qDebug() << QPoint(x, y) << time.elapsed() << "ms";
         }
     }
-
-    glViewport(0, 0, size.width(), size.height());
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    shader.enableAttributeArray(0);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     shader.disableAttributeArray(0);
-
     _image = buffer.toImage();
     buffer.doneCurrent();
 }
@@ -200,4 +172,57 @@ QVector3D Mandelbrot::rgbFromWaveLength(double wave)
     g = std::pow(g * s, 0.8);
     b = std::pow(b * s, 0.8);
     return QVector3D(r, g, b);
+}
+
+void Mandelbrot::setUniformCenter(PFNGLUNIFORM1DVPROC glUniform1dv, bool quad, QGLShaderProgram &shader, qd_real cx, qd_real cy)
+{
+    if (glUniform1dv) {
+        if (quad) {
+            GLdouble data[8] = {
+                cx[0], cx[1], cx[2], cx[3],
+                cy[0], cy[1], cy[2], cy[3]
+            };
+            glUniform1dv(shader.uniformLocation("center"), 8, data);
+        } else {
+            GLdouble data[4] = {
+                cx[0], cx[1],
+                cy[0], cy[1]
+            };
+            glUniform1dv(shader.uniformLocation("center"), 4, data);
+        }
+    } else {
+        if (quad) {
+            GLfloat data[8];
+
+            data[0] = cx[0];
+            cx -= data[0];
+            data[1] = cx[0];
+            cx -= data[1];
+            data[2] = cx[0];
+            cx -= data[2];
+            data[3] = cx[0];
+
+            data[4] = cy[0];
+            cy -= data[4];
+            data[5] = cy[0];
+            cy -= data[5];
+            data[6] = cy[0];
+            cy -= data[6];
+            data[7] = cy[0];
+
+            shader.setUniformValueArray("center", data, 8, 1);
+        } else {
+            GLfloat data[4];
+
+            data[0] = cx[0];
+            cx -= data[0];
+            data[1] = cx[0];
+
+            data[2] = cy[0];
+            cy -= data[2];
+            data[3] = cy[0];
+
+            shader.setUniformValueArray("center", data, 4, 1);
+        }
+    }
 }

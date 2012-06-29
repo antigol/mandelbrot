@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QImage>
-#include <QPixmap>
+#include <QVector>
 #include <QtOpenGL/QGLPixelBuffer>
 #include <QtOpenGL/QGLShaderProgram>
 #include <QVector3D>
@@ -17,8 +17,8 @@ public:
     ~Mandelbrot();
 
     const QImage &image() const;
-    void generate(int width, int height, qd_real cx, qd_real cy, float scale, int accuracy, float radius, bool quad = false);
-    void generate(QSize size, qd_real cx, qd_real cy, float scale, int accuracy, float radius, bool quad = false);
+    void generate(int width, int height, qd_real cx, qd_real cy, float scale, int accuracy, float radius, bool quad = false, int sx = 1, int sy = 1);
+    void generate(QSize size, qd_real cx, qd_real cy, float scale, int accuracy, float radius, bool quad = false, int sx = 1, int sy = 1);
 
     enum PaletteStyle {
         Fire,
@@ -33,6 +33,7 @@ private:
     QImage _image;
     QVector3D _colormap[256];
 
+    void setUniformCenter(PFNGLUNIFORM1DVPROC glUniform1dv, bool quad, QGLShaderProgram &shader, qd_real cx, qd_real cy);
     QVector3D rgbFromWaveLength(double wave);
 };
 

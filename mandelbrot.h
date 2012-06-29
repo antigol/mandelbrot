@@ -18,8 +18,12 @@ public:
     ~Mandelbrot();
 
     const QImage &image() const;
-    void generate(int width, int height, qd_real cx, qd_real cy, float scale, int accuracy, float radius, bool quad = false, int sx = 1, int sy = 1);
-    void generate(QSize size, qd_real cx, qd_real cy, float scale, int accuracy, float radius, bool quad = false, int sx = 1, int sy = 1);
+    void generate(int width, int height, const qd_real &cx, const qd_real &cy, float scale, int accuracy, float radius, bool quad = false, int sx = 1, int sy = 1);
+    void generate(QSize size, const qd_real &cx, const qd_real &cy, float scale, int accuracy, float radius, bool quad = false, int sx = 1, int sy = 1);
+
+    void initialize(QSize size, bool quad, int sx, int sy);
+    void render(const qd_real &cx, const qd_real &cy, float scale, int accuracy, float radius);
+    void clear();
 
     enum PaletteStyle {
         Fire,
@@ -35,9 +39,20 @@ signals:
 
 private:
     QImage _image;
-    QVector3D _colormap[256];
+    QVector3D _colormap[1024];
 
-    void setUniformCenter(qd_real cx, qd_real cy, PFNGLUNIFORM1DVPROC glUniform1dv, bool quad, QGLShaderProgram &shader);
+    ///
+    PFNGLUNIFORM1DVPROC _glUniform1dv;
+    QGLPixelBuffer *_buffer;
+    QGLShaderProgram *_shader;
+    GLfloat _aspect;
+    QSizeF _subSize;
+    int _sx, _sy;
+    bool _quad;
+    ///
+
+
+    void setUniformCenter(qd_real cx, qd_real cy);
     QVector3D rgbFromWaveLength(double wave);
 };
 

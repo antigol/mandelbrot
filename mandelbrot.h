@@ -14,17 +14,6 @@ class Mandelbrot : public QObject
 {
     Q_OBJECT
 public:    
-    explicit Mandelbrot(QObject *parent = 0);
-    ~Mandelbrot();
-
-    const QImage &image() const;
-    void generate(int width, int height, const qd_real &cx, const qd_real &cy, float scale, int accuracy, float radius, bool quad = false, int sx = 1, int sy = 1);
-    void generate(QSize size, const qd_real &cx, const qd_real &cy, float scale, int accuracy, float radius, bool quad = false, int sx = 1, int sy = 1);
-
-    void initialize(QSize size, bool quad, int sx, int sy);
-    void render(const qd_real &cx, const qd_real &cy, float scale, int accuracy, float radius);
-    void clear();
-
     enum PaletteStyle {
         Fire,
         WaveLength,
@@ -32,14 +21,19 @@ public:
         BlackAndWite
     };
 
-    void setPalette(enum PaletteStyle pal);
+    explicit Mandelbrot(QObject *parent = 0);
+    ~Mandelbrot();
 
-signals:
-    void imageChanged();
+    const QImage &image() const;
+    void generate(int width, int height, const qd_real &cx, const qd_real &cy, float scale, int accuracy, enum PaletteStyle palette, float radius = 2.0, bool quad = false, int sx = 1, int sy = 1);
+    void generate(QSize size, const qd_real &cx, const qd_real &cy, float scale, int accuracy, enum PaletteStyle palette, float radius = 2.0, bool quad = false, int sx = 1, int sy = 1);
+
+    void initialize(QSize size, enum PaletteStyle palette, bool quad, int sx, int sy);
+    void render(const qd_real &cx, const qd_real &cy, float scale, int accuracy, float radius);
+    void uninitalize();
 
 private:
     QImage _image;
-    QVector3D _colormap[1024];
 
     ///
     PFNGLUNIFORM1DVPROC _glUniform1dv;
@@ -49,9 +43,12 @@ private:
     QSizeF _subSize;
     int _sx, _sy;
     bool _quad;
+    enum PaletteStyle _palette;
     ///
 
 
+    void createColormap(QVector3D *colormap, int n, PaletteStyle pal);
+    void roundUpSize(QSize &size, int sx, int sy);
     void setUniformCenter(qd_real cx, qd_real cy);
     QVector3D rgbFromWaveLength(double wave);
 };

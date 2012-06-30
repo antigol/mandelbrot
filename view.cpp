@@ -20,6 +20,7 @@ View::View(QWidget *parent) :
     _accuracy = 100;//_set.value("accuracy", 100).toInt();
     _radius = 2.0;
     _quad = false;
+    _palette = Mandelbrot::Fire;
 
     _timer.setSingleShot(true);
     connect(&_timer, SIGNAL(timeout()), this, SLOT(redraw()));
@@ -163,7 +164,7 @@ void View::keyPressEvent(QKeyEvent *e)
     case Qt::Key_2:
     case Qt::Key_3:
     case Qt::Key_4:
-        _mandelbrot.setPalette(Mandelbrot::PaletteStyle(Mandelbrot::Fire + e->key() - Qt::Key_1));
+        _palette = Mandelbrot::PaletteStyle(Mandelbrot::Fire + e->key() - Qt::Key_1);
         std::cout << "palette changed" << std::endl;
         _timer.start(1000);
         break;
@@ -184,7 +185,7 @@ void View::save()
         QSize ss = QApplication::desktop()->screenGeometry().size();
         std::cout << "Generate new image(" << ss.width() << "," << ss.height() << ") Cx(" << _cx << ") Cy(" << _cy << ") Scale(" << _scale << ") Accuracy(" << _accuracy << ") Radius(" << _radius << ") quad(" << (_quad ? "en":"dis") << "able)... ";
         std::cout.flush();
-        _mandelbrot.generate(ss, _cx, _cy, _scale, _accuracy, _radius, _quad, 8, 8);
+        _mandelbrot.generate(ss, _cx, _cy, _scale, _accuracy, _palette, _radius, _quad, 8, 8);
         _mandelbrot.image().save(file, 0, 100);
         std::cout << "Saved!" << std::endl;
     }
@@ -197,7 +198,7 @@ void View::redraw()
 
     QTime time;
     time.start();
-    _mandelbrot.generate(size(), _cx, _cy, _scale, _accuracy, _radius, _quad, 8, 8);
+    _mandelbrot.generate(size(), _cx, _cy, _scale, _accuracy, _palette, _radius, _quad, 8, 8);
     _imove.setX(0.0);
     _imove.setY(0.0);
     _iscale = 1.0;

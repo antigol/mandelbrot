@@ -38,6 +38,7 @@ private:
     int _accuracy;
     float _radius;
     bool _quad;
+    Mandelbrot::PaletteStyle _palette;
 
     QPointF _lastMousePosition;
     QTimer _timer;

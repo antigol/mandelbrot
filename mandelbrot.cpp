@@ -2,22 +2,18 @@
 #include "palette.h"
 #include <QTime>
 #include <cmath>
-
-void splitff(double a, float &hi, float &lo)
-{
-    double temp = 536870913.0 * a; // 2^29 + 1
-    hi = temp - (temp - a);
-    lo = a - hi;
-}
+#include <iostream>
 
 Mandelbrot::Mandelbrot(QObject *parent) :
-    QObject(parent)
+    QObject(parent),
+    _buffer(0),
+    _shader(0)
 {
-    setPalette(WaveLength);
 }
 
 Mandelbrot::~Mandelbrot()
 {
+    uninitalize();
 }
 
 const QImage &Mandelbrot::image() const
@@ -25,39 +21,45 @@ const QImage &Mandelbrot::image() const
     return _image;
 }
 
-void Mandelbrot::generate(int width, int height, const qd_real &cx, const qd_real &cy, float scale, int accuracy, float radius, bool quad, int sx, int sy)
+void Mandelbrot::generate(int width, int height, const qd_real &cx, const qd_real &cy, float scale, int accuracy, PaletteStyle palette, float radius, bool quad, int sx, int sy)
 {
-    generate(QSize(width, height), cx, cy, scale, accuracy, radius, quad, sx, sy);
+    generate(QSize(width, height), cx, cy, scale, accuracy, palette, radius, quad, sx, sy);
 }
 
-void Mandelbrot::generate(QSize size, const qd_real &cx, const qd_real &cy, float scale, int accuracy, float radius, bool quad, int sx, int sy)
+void Mandelbrot::generate(QSize size, const qd_real &cx, const qd_real &cy, float scale, int accuracy, PaletteStyle palette, float radius, bool quad, int sx, int sy)
 {
-    initialize(size, quad, sx, sy);
+    roundUpSize(size, sx, sy);
+
+    if (_buffer == 0 || sx != _sx || sy != _sy || _buffer->size() != size || quad != _quad || palette != _palette)
+        initialize(size, palette, quad, sx, sy);
+
     render(cx, cy, scale, accuracy, radius);
-    clear();
 }
 
-void Mandelbrot::initialize(QSize size, bool quad, int sx, int sy)
+void Mandelbrot::initialize(QSize size, PaletteStyle palette, bool quad, int sx, int sy)
 {
+    if (_buffer != 0 || _shader != 0)
+        uninitalize();
+
     _sx = sx;
     _sy = sy;
     _quad = quad;
+    _palette = palette;
 
-    if (size.width() % sx != 0)
-        size.rwidth() += sx - (size.width() % sx);
-    if (size.height() % sy != 0)
-        size.rheight() += sy - (size.height() % sy);
+    roundUpSize(size, sx, sy);
 
     _subSize = QSizeF(size.width() / sx, size.height() / sy);
 
     _buffer = new QGLPixelBuffer(size);
     _buffer->makeCurrent();
 
-    if (QGLFormat::openGLVersionFlags().testFlag(QGLFormat::OpenGL_Version_4_0))
+    if (QGLFormat::openGLVersionFlags().testFlag(QGLFormat::OpenGL_Version_4_0)) {
         _glUniform1dv = (PFNGLUNIFORM1DVPROC) QGLContext::currentContext()->getProcAddress("glUniform1dv");
-    else
+        std::cout << "double" << std::endl;
+    } else {
         _glUniform1dv = 0;
-
+        std::cout << "float" << std::endl;
+    }
 
 
     _shader = new QGLShaderProgram();
@@ -74,7 +76,10 @@ void Mandelbrot::initialize(QSize size, bool quad, int sx, int sy)
     _shader->bind();
 
     _aspect = _subSize.width() / _subSize.height();
-    _shader->setUniformValueArray("colormap", _colormap, 1024);
+
+    QVector3D colormap[1024];
+    createColormap(colormap, 1024, palette);
+    _shader->setUniformValueArray("colormap", colormap, 1024);
     _shader->setUniformValue("aspect", _aspect);
 }
 
@@ -101,27 +106,32 @@ void Mandelbrot::render(const qd_real &cx, const qd_real &cy, float scale, int a
 
             glViewport(x * _subSize.width(), y * _subSize.height(), _subSize.width(), _subSize.height());
             glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-            _image = _buffer->toImage();
-            emit imageChanged();
         }
     }
-
     _shader->disableAttributeArray(0);
+
+    _image = _buffer->toImage();
 }
 
-void Mandelbrot::clear()
+void Mandelbrot::uninitalize()
 {
-    delete _shader;
-    delete _buffer;
+    if (_shader != 0) {
+        delete _shader;
+        _shader = 0;
+    }
+    if (_buffer != 0) {
+        delete _buffer;
+        _buffer = 0;
+    }
 }
 
-void Mandelbrot::setPalette(Mandelbrot::PaletteStyle pal)
+void Mandelbrot::createColormap(QVector3D *colormap, int n, Mandelbrot::PaletteStyle pal)
 {
     Palette p;
     switch (pal) {
     case WaveLength:
         for (int i = 0; i < 1024; ++i) {
-            _colormap[i] = rgbFromWaveLength(380.0 + i * (780.0 - 380.0) / 1024.0);
+            colormap[i] = rgbFromWaveLength(380.0 + i * (780.0 - 380.0) / double(n));
         }
         break;
     case Fire:
@@ -130,7 +140,7 @@ void Mandelbrot::setPalette(Mandelbrot::PaletteStyle pal)
         p.add(0.83, QVector3D(1.0, 1.0, 0.0));
         p.add(1.0, QVector3D(1.0, 1.0, 1.0));
         for (int i = 0; i < 1024; ++i) {
-            _colormap[i] = p.generate(double(i) / 1024.0);
+            colormap[i] = p.generate(double(i) / double(n));
         }
         break;
     case Rgb:
@@ -139,7 +149,7 @@ void Mandelbrot::setPalette(Mandelbrot::PaletteStyle pal)
         p.add(0.666, QVector3D(0.0, 0.0, 1.0));
         p.add(1.0, QVector3D(1.0, 0.0, 0.0));
         for (int i = 0; i < 1024; ++i) {
-            _colormap[i] = p.generate(double(i) / 1024.0);
+            colormap[i] = p.generate(double(i) / double(n));
         }
         break;
     case BlackAndWite:
@@ -147,7 +157,7 @@ void Mandelbrot::setPalette(Mandelbrot::PaletteStyle pal)
         p.add(0.5, QVector3D(0.0, 0.0, 0.0));
         p.add(1.0, QVector3D(1.0, 1.0, 1.0));
         for (int i = 0; i < 1024; ++i) {
-            _colormap[i] = p.generate(double(i) / 1024.0);
+            colormap[i] = p.generate(double(i) / double(n));
         }
         break;
     }
@@ -241,4 +251,12 @@ void Mandelbrot::setUniformCenter(qd_real cx, qd_real cy)
             _shader->setUniformValueArray("center", data, 4, 1);
         }
     }
+}
+
+void Mandelbrot::roundUpSize(QSize &size, int sx, int sy)
+{
+    if (size.width() % sx != 0)
+        size.rwidth() += sx - (size.width() % sx);
+    if (size.height() % sy != 0)
+        size.rheight() += sy - (size.height() % sy);
 }

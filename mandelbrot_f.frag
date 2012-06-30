@@ -3,7 +3,7 @@
 in vec2 a;
 
 uniform float center[4];
-uniform vec3 colormap[256];
+uniform vec3 colormap[1024];
 uniform int accuracy;
 uniform float radius;
 
@@ -33,7 +33,7 @@ void main(void)
     } while (iteration < accuracy);
 
     if (iteration < accuracy) {
-        color = vec4(colormap[iteration & 255], 1.0);
+        color = vec4(colormap[iteration & 1023], 1.0);
     } else {
         color = vec4(0.0, 0.0, 0.0, 1.0);
     }

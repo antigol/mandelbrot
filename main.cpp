@@ -8,11 +8,11 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-//    View w;
-//    w.resize(600, 400);
-//    w.show();
+    View w;
+    w.resize(600, 400);
+    w.show();
 
-//    return app.exec();
+    return app.exec();
 
     Mandelbrot m; //11004 5.58954e-15 26095 ms
 
@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     float scale = 1.0;
     int counter = 1;
 
-    m.initialize(size, true, 8, 8);
+    m.initialize(size, Mandelbrot::WaveLength, true, 8, 8);
 
     QTime t;
     t.start();
@@ -37,6 +37,6 @@ int main(int argc, char *argv[])
         counter++;
     }
 
-    m.clear();
+    m.uninitalize();
     return 0;
 }

@@ -9,6 +9,7 @@ class Palette
 public:
     Palette();
     void add(double f, QVector3D color);
+    void add(double f, QColor color);
     QVector3D generate(double f) const;
 
 private:

@@ -18,7 +18,8 @@ public:
         Fire,
         WaveLength,
         Rgb,
-        BlackAndWite
+        BlackAndWite,
+        Gold
     };
 
     explicit Mandelbrot(QObject *parent = 0);

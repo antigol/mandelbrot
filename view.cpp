@@ -164,6 +164,7 @@ void View::keyPressEvent(QKeyEvent *e)
     case Qt::Key_2:
     case Qt::Key_3:
     case Qt::Key_4:
+    case Qt::Key_5:
         _palette = Mandelbrot::PaletteStyle(Mandelbrot::Fire + e->key() - Qt::Key_1);
         std::cout << "palette changed" << std::endl;
         _timer.start(1000);

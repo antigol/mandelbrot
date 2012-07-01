@@ -1,4 +1,5 @@
 #include "palette.h"
+#include <QColor>
 
 Palette::Palette()
 {
@@ -7,6 +8,11 @@ Palette::Palette()
 void Palette::add(double f, QVector3D color)
 {
     _table.insert(f, color);
+}
+
+void Palette::add(double f, QColor color)
+{
+    _table.insert(f, QVector3D(color.redF(), color.greenF(), color.blueF()));
 }
 
 QVector3D Palette::generate(double f) const

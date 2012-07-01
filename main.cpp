@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     float scale = 1.0;
     int counter = 1;
 
-    m.initialize(size, Mandelbrot::WaveLength, true, 8, 8);
+    m.initialize(size, Mandelbrot::Gold, true, 8, 8);
 
     QTime t;
     t.start();

@@ -1,4 +1,6 @@
 #version 130
+#pragma optionNV(fastmath off)
+#pragma optionNV(fastprecision off)
 
 in vec2 a;
 

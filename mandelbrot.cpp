@@ -55,11 +55,15 @@ void Mandelbrot::initialize(QSize size, PaletteStyle palette, bool quad, int sx,
 
     if (QGLFormat::openGLVersionFlags().testFlag(QGLFormat::OpenGL_Version_4_0)) {
         _glUniform1dv = (PFNGLUNIFORM1DVPROC) QGLContext::currentContext()->getProcAddress("glUniform1dv");
-        std::cout << "double" << std::endl;
     } else {
         _glUniform1dv = 0;
-        std::cout << "float" << std::endl;
     }
+    _glUniform1dv = 0;
+
+    if (_glUniform1dv)
+        std::cout << "double" << std::endl;
+    else
+        std::cout << "float" << std::endl;
 
 
     _shader = new QGLShaderProgram();

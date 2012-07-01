@@ -21,8 +21,8 @@ void main(void)
     dvec2 cx = dvec2(center[0], center[1]);
     dvec2 cy = dvec2(center[2], center[3]);
 
-    cx = add_dd_d(cx, double(a.x));
-    cy = add_dd_d(cy, double(a.y));
+    cx = add_dd_d(cx, a.x);
+    cy = add_dd_d(cy, a.y);
 
     dvec2 x = cx;
     dvec2 y = cy;
@@ -73,8 +73,7 @@ void split(in double a, out double hi, out double lo)
 {
     const double SPLITTER = 134217729.0;               // = 2^27 + 1
 
-    double temp;
-    temp = SPLITTER * a;
+    double temp = SPLITTER * a;
     hi = temp - (temp - a);
     lo = a - hi;
 }

@@ -20,7 +20,7 @@ View::View(QWidget *parent) :
     _accuracy = 100;//_set.value("accuracy", 100).toInt();
     _radius = 2.0;
     _quad = false;
-    _palette = Mandelbrot::Fire;
+    _palette = Mandelbrot::Gold;
 
     _timer.setSingleShot(true);
     connect(&_timer, SIGNAL(timeout()), this, SLOT(redraw()));

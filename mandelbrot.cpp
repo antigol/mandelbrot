@@ -77,7 +77,7 @@ void Mandelbrot::initialize(QSize size, PaletteStyle palette, bool quad, int sx,
 
     _aspect = _subSize.width() / _subSize.height();
 
-    const int n = 512;
+    const int n = 256;
     QVector3D colormap[n];
     createColormap(colormap, n, palette);
     _shader->setUniformValueArray("colormap", colormap, n);

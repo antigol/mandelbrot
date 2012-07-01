@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 
     Mandelbrot m; //11004 5.58954e-15 26095 ms
 
-    QSize size(512, 512);
+    QSize size(256, 256);
     qd_real cx = qd_real("-0.743643887037158704752191506114774");
     qd_real cy = qd_real("0.131825904205311970493132056385139");
 

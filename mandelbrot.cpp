@@ -166,13 +166,17 @@ void Mandelbrot::createColormap(QVector3D *colormap, int n, Mandelbrot::PaletteS
         }
         break;
     case Gold:
-        p.add(0.0, QColor(0x0b0678));
-        p.add(0.25, QColor(0x93bfc5));
-        p.add(0.5, QColor(0x2b71dc));
+        p.add(0.00, QColor(0x0b0678));
+        p.add(0.16, QColor(0x93bfc5));
+        p.add(0.33, QColor(0x2b71dc));
 
-        p.add(0.5, QColor(0xf9fcbb));
-        p.add(0.75, QColor(0xbcaa19));
-        p.add(1.0, QColor(0xfef356));
+        p.add(0.33, QColor(0xf9fcbb));
+        p.add(0.49, QColor(0xbcaa19));
+        p.add(0.66, QColor(0xfef356));
+
+        p.add(0.66, QColor(0x520200));
+        p.add(0.82, QColor(0xff2e2a));
+        p.add(1.00, QColor(0xae2707));
         for (int i = 0; i < n; ++i) {
             colormap[i] = p.generate(double(i) / double(n));
         }

@@ -42,6 +42,7 @@ private:
 
     QPointF _lastMousePosition;
     QTimer _timer;
+    int _lastTime;
 
     QSettings _set;
 };

@@ -83,7 +83,11 @@ void View::mouseMoveEvent(QMouseEvent *e)
 
         _cx -= d.x();
         _cy += d.y();
-        update();
+
+        if (_lastTime < 30)
+            redraw();
+        else
+            update();
     }
     _lastMousePosition = e->posF();
 }
@@ -116,6 +120,8 @@ void View::wheelEvent(QWheelEvent *e)
     update();
 
     _timer.start(150);
+    if (_lastTime < 60)
+        redraw();
 }
 
 #include <QKeyEvent>
@@ -204,6 +210,7 @@ void View::redraw()
     _imove.setY(0.0);
     _iscale = 1.0;
 
+    _lastTime = time.elapsed();
     std::cout << "Ok! " << time.elapsed() << "ms" << std::endl;
 
     update();

@@ -14,13 +14,19 @@ View::View(QWidget *parent) :
 {
     setAttribute(Qt::WA_OpaquePaintEvent);
 
-    _cx = qd_real("-0.743643887037158704752191506114774");
-    _cy = qd_real("0.131825904205311970493132056385139");
     _scale = 1.0;
     _accuracy = 100;//_set.value("accuracy", 100).toInt();
+    _cx = qd_real(_set.value("cx", "-0.743643887037158704752191506114774").toString().toLatin1().data());
+    _cy = qd_real(_set.value("cy", "0.131825904205311970493132056385139").toString().toLatin1().data());
+    _scale = _set.value("scale", 1.0).toFloat();
+
+    //_cx = qd_real(0);
+    //_cy = qd_real(0);
+    //_scale = 1.0;
+
     _radius = 2.0;
     _quad = false;
-    _palette = Mandelbrot::Gold;
+    _palette = Mandelbrot::Nice;
 
     _timer.setSingleShot(true);
     connect(&_timer, SIGNAL(timeout()), this, SLOT(redraw()));
@@ -30,6 +36,9 @@ View::View(QWidget *parent) :
 
 View::~View()
 {
+    _set.setValue("cx", QString::fromStdString(_cx.to_string(50)));
+    _set.setValue("cy", QString::fromStdString(_cy.to_string(50)));
+    _set.setValue("scale", _scale);
     _set.setValue("accuracy", _accuracy);
 }
 
@@ -69,7 +78,7 @@ void View::paintEvent(QPaintEvent *)
 void View::mousePressEvent(QMouseEvent *e)
 {
     QWidget::mousePressEvent(e);
-    _lastMousePosition = e->posF();
+    _lastMousePosition = e->pos();
 }
 
 void View::mouseMoveEvent(QMouseEvent *e)
@@ -77,10 +86,9 @@ void View::mouseMoveEvent(QMouseEvent *e)
     QWidget::mouseMoveEvent(e);
 
     if (e->buttons() & Qt::LeftButton) {
-        QPointF d = e->posF() - _lastMousePosition;
+        QPointF d = e->pos() - _lastMousePosition;
         _imove += d;
         d *= 2.0 * _scale / qreal(height());
-
         _cx -= d.x();
         _cy += d.y();
 
@@ -89,7 +97,7 @@ void View::mouseMoveEvent(QMouseEvent *e)
         else
             update();
     }
-    _lastMousePosition = e->posF();
+    _lastMousePosition = e->pos();
 }
 
 void View::mouseReleaseEvent(QMouseEvent *e)
@@ -200,8 +208,9 @@ void View::save()
 
 void View::redraw()
 {
+    std::cout.precision(25);
     std::cout << "Generate new image. Cx(" << _cx << ") Cy(" << _cy << ") Scale(" << _scale << ") Accuracy(" << _accuracy << ") Radius(" << _radius << ") quad(" << (_quad ? "en":"dis") << "able) ... ";
-    std::cout.flush();
+    std::cout << std::flush;
 
     QTime time;
     time.start();

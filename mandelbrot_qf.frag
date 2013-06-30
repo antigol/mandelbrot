@@ -33,7 +33,7 @@ void main(void)
         vec4 x2 = sqr_qf(x);
         vec4 y2 = sqr_qf(y);
 
-        if (x2.x + y2.x > radius)
+        if (x2[0] + y2[0] > radius)
             break;
 
         vec4 xtemp = add_qf_qf(x2, -y2);
@@ -136,12 +136,22 @@ vec4 add_qf_f(in vec4 a, in float b)
 
 void split(in float a, out float hi, out float lo)
 {
-    const float SPLITTER = 4097.0;               // = 2^12 + 1
+    const float SPLITTER = 4097.0;                   // = 2^12 + 1
+    const float SPLIT_THRESH = 4.1538374868279e+34;  // = 2^115
 
     float temp;
-    temp = SPLITTER * a;
-    hi = temp - (temp - a);
-    lo = a - hi;
+    if (a > SPLIT_THRESH || a < -SPLIT_THRESH) {
+      a *= 0.0001220703125;  // 2^-13
+      temp = SPLITTER * a;
+      hi = temp - (temp - a);
+      lo = a - hi;
+      hi *= 8192.0;          // 2^13
+      lo *= 8192.0;          // 2^13
+    } else {
+      temp = SPLITTER * a;
+      hi = temp - (temp - a);
+      lo = a - hi;
+    }
 }
 
 float two_prod(in float a, in float b, out float err)

@@ -17,7 +17,7 @@ public:
     enum PaletteStyle {
         Fire,
         WaveLength,
-        Rgb,
+        Nice,
         BlackAndWite,
         Gold
     };

@@ -137,11 +137,21 @@ dvec4 add_qd_d(in dvec4 a, in double b)
 void split(in double a, out double hi, out double lo)
 {
     const double _QD_SPLITTER = 134217729.0;               // = 2^27 + 1
+    const double _QD_SPLIT_THRESH = 6.69692879491417e+299; // = 2^996
 
     double temp;
-    temp = _QD_SPLITTER * a;
-    hi = temp - (temp - a);
-    lo = a - hi;
+    if (a > _QD_SPLIT_THRESH || a < -_QD_SPLIT_THRESH) {
+      a *= 3.7252902984619140625e-09;  // 2^-28
+      temp = _QD_SPLITTER * a;
+      hi = temp - (temp - a);
+      lo = a - hi;
+      hi *= 268435456.0;          // 2^28
+      lo *= 268435456.0;          // 2^28
+    } else {
+      temp = _QD_SPLITTER * a;
+      hi = temp - (temp - a);
+      lo = a - hi;
+    }
 }
 
 double two_prod(in double a, in double b, out double err)

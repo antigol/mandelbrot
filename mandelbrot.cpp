@@ -3,6 +3,7 @@
 #include <QTime>
 #include <cmath>
 #include <iostream>
+using namespace std;
 
 Mandelbrot::Mandelbrot(QObject *parent) :
     QObject(parent),
@@ -71,7 +72,7 @@ void Mandelbrot::initialize(QSize size, PaletteStyle palette, bool quad, int sx,
     if (_glUniform1dv) {
         _shader->addShaderFromSourceFile(QGLShader::Fragment, quad ? ":/frag/mandelbrot_qd.frag" : ":/frag/mandelbrot_dd.frag");
     } else {
-        _shader->addShaderFromSourceFile(QGLShader::Fragment, quad ? ":/frag/mandelbrot_qf.frag" : ":/frag/mandelbrot_df.frag");
+        _shader->addShaderFromSourceFile(QGLShader::Fragment, quad ? ":/frag/mandelbrot_qf.frag" : ":/frag/mandelbrot_f.frag");
     }
 
     _shader->bindAttributeLocation("vertex", 0);
@@ -148,11 +149,12 @@ void Mandelbrot::createColormap(QVector3D *colormap, int n, Mandelbrot::PaletteS
             colormap[i] = p.generate(double(i) / double(n));
         }
         break;
-    case Rgb:
-        p.add(0.0, QVector3D(1.0, 0.0, 0.0));
-        p.add(0.333, QVector3D(0.0, 1.0, 0.0));
-        p.add(0.666, QVector3D(0.0, 0.0, 1.0));
-        p.add(1.0, QVector3D(1.0, 0.0, 0.0));
+    case Nice:
+        p.add(0.0, QColor(0x00065E));
+        p.add(0.3, QColor(0xFFFFFF));
+        p.add(0.7, QColor(0xFFB403));
+        p.add(0.9, QColor(0x410328));
+        p.add(1.0, QColor(0x00065E));
         for (int i = 0; i < n; ++i) {
             colormap[i] = p.generate(double(i) / double(n));
         }

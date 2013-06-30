@@ -9,6 +9,11 @@ uniform float radius;
 
 out vec4 color;
 
+// z = 1
+
+// z²+c
+
+// z^2+c=0
 void main(void)
 {
     float cx = center[0] + a.x;

@@ -36,14 +36,13 @@ void main(void)
         if (x2.x + y2.x > radius)
             break;
 
-        dvec2 xtemp = add_dd_dd(x2, -y2);
-        xtemp = add_dd_dd(xtemp, cx);
-
         y = mul_dd_dd(x, y);
         y *= 2.0;
         y = add_dd_dd(y, cy);
 
-        x = xtemp;
+        x = add_dd_dd(x2, -y2);
+        x = add_dd_dd(x, cx);
+
         ++iteration;
     } while (iteration < accuracy);
 

@@ -36,14 +36,13 @@ void main(void)
         if (x2.x + y2.x > radius)
             break;
 
-        dvec4 xtemp = add_qd_qd(x2, -y2);
-        xtemp = add_qd_qd(xtemp, cx);
-
         y = mul_qd_qd(x, y);
         y *= 2.0;
         y = add_qd_qd(y, cy);
 
-        x = xtemp;
+        x = add_qd_qd(x2, -y2);
+        x = add_qd_qd(x, cx);
+
         ++iteration;
     } while (iteration < accuracy);
 

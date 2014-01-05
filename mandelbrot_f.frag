@@ -30,10 +30,9 @@ void main(void)
         if ((x2 + y2) > radius)
             break;
 
-        float xtemp = x2 - y2 + cx;
         y = 2 * x * y + cy;
+        x = x2 - y2 + cx;
 
-        x = xtemp;
         ++iteration;
     } while (iteration < accuracy);
 

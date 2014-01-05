@@ -36,14 +36,13 @@ void main(void)
         if (x2[0] + y2[0] > radius)
             break;
 
-        vec4 xtemp = add_qf_qf(x2, -y2);
-        xtemp = add_qf_qf(xtemp, cx);
-
         y = mul_qf_qf(x, y);
         y *= 2.0;
         y = add_qf_qf(y, cy);
 
-        x = xtemp;
+        x = add_qf_qf(x2, -y2);
+        x = add_qf_qf(x, cx);
+
         ++iteration;
     } while (iteration < accuracy);
 

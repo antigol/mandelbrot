@@ -38,14 +38,13 @@ void main(void)
         if (x2.x + y2.x > radius)
             break;
 
-        vec2 xtemp = add_df_df(x2, -y2);
-        xtemp = add_df_df(xtemp, cx);
-
         y = mul_df_df(x, y);
         y *= 2.0;
         y = add_df_df(y, cy);
 
-        x = xtemp;
+        x = add_df_df(x2, -y2);
+        x = add_df_df(x, cx);
+
         ++iteration;
     } while (iteration < accuracy);
 

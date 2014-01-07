@@ -7,13 +7,13 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-/*
+
     View w;
     w.resize(600, 400);
     w.show();
 
     return app.exec();
-*/
+
     Mandelbrot m; //11004 5.58954e-15 26095 ms
 
     //QSize size(256, 256);

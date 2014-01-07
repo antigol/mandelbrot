@@ -55,11 +55,12 @@ void Mandelbrot::initialize(QSize size, PaletteStyle palette, bool quad, int sx,
     _buffer->makeCurrent();
 
     if (QGLFormat::openGLVersionFlags().testFlag(QGLFormat::OpenGL_Version_4_0)) {
+    	std::cout << "opengl 4" << endl;
         _glUniform1dv = (PFNGLUNIFORM1DVPROC) QGLContext::currentContext()->getProcAddress("glUniform1dv");
     } else {
         _glUniform1dv = 0;
     }
-    _glUniform1dv = 0;
+    //_glUniform1dv = 0;
 
     if (_glUniform1dv)
         std::cout << "double" << std::endl;
